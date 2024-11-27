@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Template;
+namespace PHPPress;
 
 final class Example
 {
