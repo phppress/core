@@ -1,12 +1,12 @@
 {
-    "name": "phppress/template",
+    "name": "phppress/core",
     "type": "library",
-    "description": "A template repository for PHP packages, offering a standardized structure, dependency injection setup, and essential configurations to streamline and accelerate package development.",
+    "description": "Core components of PHPPress, a modern PHP framework for web application development. Essential for building scalable, maintainable web apps.",
     "keywords": [
-        "php",
-        "repository",
-        "package",
-        "template"
+        "phppress",
+        "core",
+        "framework",
+        "application"
     ],
     "license": "gpl-3.0",
     "minimum-stability": "dev",
@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "PHPPress\\Template\\": "src"
+            "PHPPress\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "PHPPress\\Template\\Tests\\": "tests"
+            "PHPPress\\Tests\\": "tests"
         }
     },
     "extra": {

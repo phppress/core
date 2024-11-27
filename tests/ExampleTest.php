@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Template\Tests;
+namespace PHPPress\Tests;
 
-use PHPPress\Template\Example;
+use PHPPress\Example;
 
 final class ExampleTest extends \PHPUnit\Framework\TestCase
 {
