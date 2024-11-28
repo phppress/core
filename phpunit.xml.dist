@@ -12,7 +12,7 @@
   stopOnFailure="false"
 >
   <testsuites>
-    <testsuite name="Template">
+    <testsuite name="Core">
       <directory>tests</directory>
     </testsuite>
   </testsuites>
