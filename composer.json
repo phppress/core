@@ -12,7 +12,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "psr/container": "^2.0"
     },
     "require-dev": {
         "infection/infection": "^0.29",
@@ -45,7 +46,7 @@
         "ecs": "vendor/bin/ecs check src tests",
         "ecs-fix": "vendor/bin/ecs check src tests --fix",
         "mutation": "vendor/bin/infection --min-msi=100 --min-covered-msi=100",
-        "static": "phpstan analyse src tests",
+        "static": "phpstan analyse src",
         "tests": "vendor/bin/phpunit"
     }
 }

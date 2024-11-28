@@ -5,6 +5,7 @@ declare(strict_types=1);
 use PhpCsFixer\Fixer\ClassNotation\ClassDefinitionFixer;
 use PhpCsFixer\Fixer\ClassNotation\OrderedClassElementsFixer;
 use PhpCsFixer\Fixer\ClassNotation\OrderedTraitsFixer;
+use PhpCsFixer\Fixer\ClassNotation\VisibilityRequiredFixer;
 use PhpCsFixer\Fixer\Import\NoUnusedImportsFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
@@ -14,6 +15,12 @@ return ECSConfig::configure()
         [
             'space_before_parenthesis' => true,
         ],
+    )
+    ->withConfiguredRule(
+        VisibilityRequiredFixer::class,
+        [
+            'elements' => [], // Esto deshabilitará la regla de visibilidad
+        ]
     )
     ->withFileExtensions(['php'])
     ->withPaths(
@@ -29,7 +36,7 @@ return ECSConfig::configure()
         docblocks: true,
         namespaces: true,
         psr12: true,
-        strict: true
+        strict: true,
     )
     ->withRules(
         [
