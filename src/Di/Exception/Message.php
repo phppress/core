@@ -13,9 +13,7 @@ namespace PHPPress\Di\Exception;
 enum Message: string
 {
     case COMPONENT_ID_EMPTY = 'The required component "id" is empty.';
-    case DEFINITION_EMPTY = 'Object definition cannot be empty.';
     case DEFINITION_INVALID = 'Invalid definition for "%s": %s';
-    case DEFINITION_INVALID_CLASS_OPTION = 'Object definition must be an array containing a "class" or "__class" element.';
     case DEFINITION_REQUIRES_CLASS_OPTION = 'A class definition requires a "__class" or "class" member.';
     case DEFINITION_TYPE_UNSUPPORTED = 'Unsupported definition type for "%s".';
     case DEPENDENCIES_IDX_NAME_POSITION = 'Dependencies indexed by name and by position in the same array are not allowed.';
@@ -27,8 +25,6 @@ enum Message: string
     {
         return match ($this) {
             self::COMPONENT_ID_EMPTY,
-            self::DEFINITION_EMPTY,
-            self::DEFINITION_INVALID_CLASS_OPTION,
             self::DEFINITION_REQUIRES_CLASS_OPTION,
             self::DEPENDENCIES_IDX_NAME_POSITION => $this->value,
             self::DEFINITION_INVALID,
