@@ -17,7 +17,7 @@ final class Hook
     }
 
     public string $fullName {
-        get => public $this->firstName . ' ' . public $this->lastName;
+        get => $this->firstName . ' ' . $this->lastName;
     }
 
     public string $lastName {
