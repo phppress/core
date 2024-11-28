@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPPress\Tests\Di\Stub;
 
 /**
@@ -8,6 +10,4 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-abstract class AbstractColor
-{
-}
+abstract class AbstractColor {}

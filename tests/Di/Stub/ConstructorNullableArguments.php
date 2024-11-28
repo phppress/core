@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ConstructorNullableArguments
 {
-    public function __construct(Car|null $car)
-    {
-    }
+    public function __construct(Car|null $car) {}
 }

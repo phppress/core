@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class CarTunning
 {
-    public function __construct(public string|null $color = null)
-    {
-    }
+    public function __construct(public string|null $color = null) {}
 }

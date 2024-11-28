@@ -16,7 +16,6 @@ final class Alpha
         public Beta|null $beta = null,
         public DefinitionClassInterface|null $omega = null,
         public Unknown|null $unknown = null,
-        public AbstractColor|null $color = null
-    ) {
-    }
+        public AbstractColor|null $color = null,
+    ) {}
 }

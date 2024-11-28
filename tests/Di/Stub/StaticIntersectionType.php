@@ -13,12 +13,10 @@ namespace PHPPress\Tests\Di\Stub;
 final class StaticIntersectionType
 {
     public static function anotherDefinitionClassAndDefinitionClassInterfaceIntersection(
-        AnotherDefinitionClass&DefinitionClassInterface $object
-    ): void {
-    }
+        AnotherDefinitionClass&DefinitionClassInterface $object,
+    ): void {}
 
     public static function definitionClassInterfaceAndDefinitionClassIntersection(
-        DefinitionClassInterface&AnotherDefinitionClass $object
-    ) {
-    }
+        DefinitionClassInterface&AnotherDefinitionClass $object,
+    ) {}
 }

@@ -15,9 +15,7 @@ final class EngineMarkTwo implements EngineInterface
     public const NAME = 'Mark Two';
     public const NUMBER = 2;
 
-    public function __construct(private int $number = self::NUMBER)
-    {
-    }
+    public function __construct(private int $number = self::NUMBER) {}
 
     public function getName(): string
     {

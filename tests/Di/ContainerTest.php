@@ -98,7 +98,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->expectException(ArgumentCountError::class);
         $this->expectExceptionMessage(
             'Too few arguments to function PHPPress\Tests\Di\Stub\ConstructorUnionType::__construct(), 0 ' .
-            'passed and exactly 1 expected'
+            'passed and exactly 1 expected',
         );
 
         new Container()->create(Stub\ConstructorUnionType::class);
@@ -150,7 +150,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".'
+            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
         );
 
         $this->container->create(\NonExistentClass::class);
@@ -198,7 +198,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
                 $barInstance = new Stub\Bar($definitionInstance);
 
                 return new Stub\Foo($barInstance);
-            }
+            },
         );
 
         $fooInstance = $this->container->get('foo');
@@ -215,7 +215,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             'foo',
             static function (Container $c, array $config = []): Stub\Foo {
                 return $c->get(Stub\Foo::class);
-            }
+            },
         );
 
         $fooInstance = $this->container->get('foo');
@@ -247,7 +247,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             'foo',
             [
                 '__class' => $fooPropertyClass,
-                'bar' => Instance::of('bar')
+                'bar' => Instance::of('bar'),
             ],
         );
         $this->container->set(
@@ -255,7 +255,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             [
                 '__class' => $barSetterClass,
                 'setDefinitionClass()' => [Instance::of('definitionInstance')],
-            ]
+            ],
         );
         $this->container->set('definitionInstance', $definitionInstance);
 
@@ -306,7 +306,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
                 Stub\DefinitionClass::class => [
                     'setA()' => [42],
                 ],
-            ]
+            ],
         );
 
         $definitionInstance = $this->container->get('definition');
@@ -321,7 +321,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(
             Stub\ConstructorNullableArguments::class,
-            $this->container->get(Stub\ConstructorNullableArguments::class)
+            $this->container->get(Stub\ConstructorNullableArguments::class),
         );
     }
 
@@ -331,7 +331,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(
             Stub\ConstructorNullableArguments::class,
-            $this->container->get(Stub\ConstructorNullableArguments::class)
+            $this->container->get(Stub\ConstructorNullableArguments::class),
         );
     }
 
@@ -365,7 +365,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: Dependencies indexed by name and by position in the same array are not allowed.'
+            'Invalid configuration: Dependencies indexed by name and by position in the same array are not allowed.',
         );
 
         $this->container->get(Stub\ConstructorNullableArguments::class);
@@ -402,7 +402,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "car" when instantiating "' . $className . '".'
+            'Not instantiable exception: Missing required parameter "car" when instantiating "' . $className . '".',
         );
 
         $this->container->get($className);
@@ -431,7 +431,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
                     'class' => Stub\DefinitionClass::class,
                 ],
             ],
-            $this->container->getDefinitions()
+            $this->container->getDefinitions(),
         );
     }
 
@@ -478,26 +478,26 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
     public function testInvokeWithConcreteDependenciesClass(): void
     {
-        $closure = static fn (
-            Stub\ConstructorNullValueArgumentDefault $optionalConcreteDependency
+        $closure = static fn(
+            Stub\ConstructorNullValueArgumentDefault $optionalConcreteDependency,
         ): bool => $optionalConcreteDependency->getCar() !== null;
 
         $this->assertTrue(
             $this->container->invoke(
                 $closure,
-                [new Stub\ConstructorNullValueArgumentDefault(new Stub\Car(new Stub\EngineMarkOne()))]
-            )
+                [new Stub\ConstructorNullValueArgumentDefault(new Stub\Car(new Stub\EngineMarkOne()))],
+            ),
         );
     }
 
     public function testInvokeWithConcreteDependenciesClassException(): void
     {
-        $closure = static fn (Stub\Bar $bar): Stub\Bar => $bar;
+        $closure = static fn(Stub\Bar $bar): Stub\Bar => $bar;
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
             'Not instantiable exception: Missing required parameter "definitionInstance" when instantiating ' .
-            '"PHPPress\Tests\Di\Stub\Bar".'
+            '"PHPPress\Tests\Di\Stub\Bar".',
         );
 
         $this->container->invoke($closure);
@@ -505,8 +505,8 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
     public function testInvokeWithOptionalDependenciesClass(): void
     {
-        $closure = static fn (
-            Stub\DefinitionClass|null $definitionInstance = null
+        $closure = static fn(
+            Stub\DefinitionClass|null $definitionInstance = null,
         ): bool => $definitionInstance !== null;
 
         $this->assertFalse($this->container->invoke($closure));
@@ -554,7 +554,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
     public function testResolveCallableDependencies(): void
     {
-        $closure = static fn (int $a, int $b): bool => $a > $b;
+        $closure = static fn(int $a, int $b): bool => $a > $b;
 
         $this->assertSame([1, 5], $this->container->resolveCallableDependencies($closure, ['b' => 5, 'a' => 1]));
         $this->assertSame([1, 5], $this->container->resolveCallableDependencies($closure, ['a' => 1, 'b' => 5]));
@@ -641,7 +641,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.'
+            'Invalid configuration: A class definition requires a "__class" or "class" member.',
         );
 
         $this->container->setDefinitions(
@@ -657,7 +657,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.'
+            'Invalid configuration: A class definition requires a "__class" or "class" member.',
         );
 
         $this->container->setDefinitions(
@@ -673,7 +673,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.'
+            'Invalid configuration: A class definition requires a "__class" or "class" member.',
         );
 
         $this->container->setDefinitions(
@@ -691,7 +691,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\EngineMarkOne::class => Stub\EngineMarkOne::class,
                 EngineInterface::class => Stub\EngineMarkOne::class,
-            ]
+            ],
         );
 
         $carInstance = $this->container->get(Stub\Car::class);
@@ -706,13 +706,13 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\EngineMarkOne::class,
                 Stub\EngineMarkTwo::class,
-            ]
+            ],
         );
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
             'Not instantiable exception: Missing required parameter "engine" when instantiating ' .
-            '"PHPPress\Tests\Di\Stub\Car".'
+            '"PHPPress\Tests\Di\Stub\Car".',
         );
 
         $this->container->get(Stub\Car::class);
@@ -757,7 +757,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\EngineMarkOne::class => Stub\EngineMarkOne::class,
                 EngineInterface::class => Stub\EngineMarkOne::class,
-            ]
+            ],
         );
 
         $carInstance = $this->container->get(Stub\Car::class);
@@ -773,12 +773,12 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\EngineMarkOne::class,
                 Stub\EngineMarkTwo::class,
-            ]
+            ],
         );
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "engine" when instantiating "' . $clasName . '".'
+            'Not instantiable exception: Missing required parameter "engine" when instantiating "' . $clasName . '".',
         );
 
         $this->container->get($clasName);

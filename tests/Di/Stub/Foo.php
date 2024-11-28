@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class Foo
 {
-    public function __construct(public Bar $bar)
-    {
-    }
+    public function __construct(public Bar $bar) {}
 }

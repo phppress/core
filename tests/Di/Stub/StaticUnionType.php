@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class StaticUnionType
 {
-    public static function engineCar(EngineMarkOne|EngineMarkTwo $value): void
-    {
-    }
+    public static function engineCar(EngineMarkOne|EngineMarkTwo $value): void {}
 }

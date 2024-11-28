@@ -14,9 +14,7 @@ final class EngineMarkOneInmutable
 {
     public const NAME = 'Mark One';
 
-    public function __construct(private int $number = 1)
-    {
-    }
+    public function __construct(private int $number = 1) {}
 
     public function getName(): string
     {

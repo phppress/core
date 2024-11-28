@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class Corge
 {
-    public function __construct(public array $map)
-    {
-    }
+    public function __construct(public array $map) {}
 }

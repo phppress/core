@@ -45,9 +45,7 @@ class ReflectionFactory
      */
     private bool $resolveArrays = true;
 
-    public function __construct(private readonly Container $container)
-    {
-    }
+    public function __construct(private readonly Container $container) {}
 
     /**
      * Checks if a class can be autowired.
@@ -79,7 +77,7 @@ class ReflectionFactory
      */
     public function create(string $class, array $definitions = []): object
     {
-        /* @var $reflection ReflectionClass */
+        /** @var ReflectionClass $reflection */
         [$reflection, $dependencies] = $this->getDependencies($class);
 
         $addDependencies = $definitions['__construct()'] ?? [];
@@ -219,7 +217,7 @@ class ReflectionFactory
                         $class = $reflection->getName();
 
                         throw new NotInstantiable(
-                            Message::PARAMETER_MISSING->getMessage($name, $class)
+                            Message::PARAMETER_MISSING->getMessage($name, $class),
                         );
                     }
 

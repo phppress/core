@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ConstructorUnionType
 {
-    public function __construct(protected string|int|float|bool $value)
-    {
-    }
+    public function __construct(protected string|int|float|bool $value) {}
 }

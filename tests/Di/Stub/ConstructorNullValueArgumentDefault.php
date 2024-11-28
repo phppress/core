@@ -12,9 +12,7 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ConstructorNullValueArgumentDefault
 {
-    public function __construct(private readonly Car|null $car = null)
-    {
-    }
+    public function __construct(private readonly Car|null $car = null) {}
 
     public function getCar(): Car|null
     {

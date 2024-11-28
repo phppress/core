@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class Kappa
 {
-    public function __construct(Unknown $unknown)
-    {
-    }
+    public function __construct(Unknown $unknown) {}
 }

@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class Bar
 {
-    public function __construct(public DefinitionClassInterface $definitionInstance)
-    {
-    }
+    public function __construct(public DefinitionClassInterface $definitionInstance) {}
 }

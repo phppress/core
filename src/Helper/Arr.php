@@ -10,6 +10,4 @@ namespace PHPPress\Helper;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Arr extends AbstractArray
-{
-}
+final class Arr extends AbstractArray {}

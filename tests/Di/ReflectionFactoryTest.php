@@ -46,7 +46,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".'
+            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
         );
 
         $this->factory->create('NonExistentClass');
@@ -96,7 +96,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "' . $interfaceClass . '".'
+            'Not instantiable exception: Failed to instantiate component or class: "' . $interfaceClass . '".',
         );
 
         $this->factory->create($interfaceClass);
@@ -107,7 +107,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $betaInstance = new Stub\Beta();
 
         $result = $this->factory->resolveCallableDependencies(
-            static fn (Stub\Beta $param) => $param,
+            static fn(Stub\Beta $param) => $param,
             ['param' => $betaInstance],
         );
 
@@ -120,7 +120,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $betaInstance = new Stub\Beta();
 
         $result = $this->factory->resolveCallableDependencies(
-            static fn (Stub\Beta $param, null $optionalParam = null) => [$param, $optionalParam],
+            static fn(Stub\Beta $param, null $optionalParam = null) => [$param, $optionalParam],
             ['param' => $betaInstance],
         );
 
@@ -134,13 +134,13 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage('Invalid configuration: Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():137}".');
 
-        $this->factory->resolveCallableDependencies(static fn (string $requiredParam) => $requiredParam);
+        $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
     }
 
     public function testResolveCallableDependenciesHandlesAdditionalParams(): void
     {
         $result = $this->factory->resolveCallableDependencies(
-            static fn (string $param1, ...$additionalParams): array => [$param1, $additionalParams],
+            static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
             ['First', 'Second', 'Third'],
         );
 
@@ -154,7 +154,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".'
+            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
         );
 
         $this->factory->resolveDependencies([Instance::of('NonExistentClass')]);
@@ -164,7 +164,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Dependencies indexed by name and by position in the same array are not allowed.'
+            'Dependencies indexed by name and by position in the same array are not allowed.',
         );
 
         $this->factory->create(
@@ -172,7 +172,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
             [
                 '__construct()' => [
                     'definitionClass' => new Stub\DefinitionClass(),
-                    '1' => ['a' => 1]
+                    '1' => ['a' => 1],
                 ],
             ],
         );

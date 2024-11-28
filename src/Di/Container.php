@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Di;
 
-use PHPPress\Di\Exception\{Message, NotInstantiable, NotFound};
+use PHPPress\Di\Exception\{Message, NotInstantiable};
 use PHPPress\Exception\InvalidConfig;
 use PHPPress\Helper\Arr;
 use Psr\Container\ContainerInterface;
@@ -328,7 +328,7 @@ class Container implements ContainerInterface
         }
     }
 
-   /**
+    /**
      * Returns an instance of the requested class.
      *
      * Note that if the class is declared to be singleton by calling [[setSingleton()]], the same instance of the class

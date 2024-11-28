@@ -12,7 +12,5 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class UnionTypeWithClass
 {
-    public function __construct(public string|Beta $value)
-    {
-    }
+    public function __construct(public string|Beta $value) {}
 }
