@@ -14,7 +14,9 @@ final class NotInstantiable extends \Exception
 {
     public function __construct(string $message = '', int $code = 0, \Throwable|null $previous = null)
     {
-        $message = 'Not instantiable exception: ' . $message;
+        if ($message !== '') {
+            $message = "Not instantiable exception: \"$message\"";
+        }
 
         parent::__construct($message, $code, $previous);
     }

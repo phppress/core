@@ -150,7 +150,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
+            'Not instantiable exception: "Failed to instantiate component or class: "NonExistentClass"."',
         );
 
         $this->container->create(\NonExistentClass::class);
@@ -365,7 +365,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: Dependencies indexed by name and by position in the same array are not allowed.',
+            'Invalid configuration: "Dependencies indexed by name and by position in the same array are not allowed."',
         );
 
         $this->container->get(Stub\ConstructorNullableArguments::class);
@@ -391,7 +391,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->expectException(NotInstantiable::class);
-        $this->expectExceptionMessage('Not instantiable exception: Failed to instantiate component or class: "42".');
+        $this->expectExceptionMessage('Not instantiable exception: "Failed to instantiate component or class: "42".""');
 
         $this->container->get('test');
     }
@@ -402,7 +402,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "car" when instantiating "' . $className . '".',
+            'Not instantiable exception: "Missing required parameter "car" when instantiating "' . $className . '"."',
         );
 
         $this->container->get($className);
@@ -496,8 +496,8 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "definitionInstance" when instantiating ' .
-            '"PHPPress\Tests\Di\Stub\Bar".',
+            'Not instantiable exception: "Missing required parameter "definitionInstance" when instantiating ' .
+            '"PHPPress\Tests\Di\Stub\Bar"."',
         );
 
         $this->container->invoke($closure);
@@ -621,7 +621,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     public function testSetWithInvalidDefinition(): void
     {
         $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: Invalid definition for "test": invalid');
+        $this->expectExceptionMessage('Invalid configuration: "Invalid definition for "test": invalid"');
 
         $this->container->set('test', 'invalid');
     }
@@ -641,7 +641,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.',
+            'Invalid configuration: "A class definition requires a "__class" or "class" member."',
         );
 
         $this->container->setDefinitions(
@@ -657,7 +657,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.',
+            'Invalid configuration: "A class definition requires a "__class" or "class" member."',
         );
 
         $this->container->setDefinitions(
@@ -673,7 +673,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: A class definition requires a "__class" or "class" member.',
+            'Invalid configuration: "A class definition requires a "__class" or "class" member."',
         );
 
         $this->container->setDefinitions(
@@ -702,6 +702,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
     public function testSetDefinitionsWithIntegerKeysException(): void
     {
+        $className = Stub\Car::class;
         $this->container->setDefinitions(
             [
                 Stub\EngineMarkOne::class,
@@ -711,11 +712,11 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "engine" when instantiating ' .
-            '"PHPPress\Tests\Di\Stub\Car".',
+            'Not instantiable exception: "Missing required parameter "engine" when instantiating "' .
+            $className . '"."',
         );
 
-        $this->container->get(Stub\Car::class);
+        $this->container->get($className);
     }
 
     public function testSetDefinitionsWithObjectClass(): void
@@ -731,7 +732,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     public function testSetDefinitionWithScalar(): void
     {
         $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: Unsupported definition type for "integer".');
+        $this->expectExceptionMessage('Invalid configuration: "Unsupported definition type for "integer"."');
 
         $this->container->setDefinitions(['scalar' => 42]);
     }
@@ -778,7 +779,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Missing required parameter "engine" when instantiating "' . $clasName . '".',
+            'Not instantiable exception: "Missing required parameter "engine" when instantiating "' . $clasName . '"."',
         );
 
         $this->container->get($clasName);
