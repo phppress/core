@@ -41,13 +41,13 @@ final class ContainerProvider
         return [
             [
                 Bar::class,
-                'Not instantiable exception: Missing required parameter "definitionInstance" when instantiating "'
-                . Bar::class . '".',
+                'Not instantiable exception: "Missing required parameter "definitionInstance" when instantiating "'
+                . Bar::class . '"."',
             ],
             [
                 Kappa::class,
-                'Not instantiable exception: Missing required parameter "unknown" when instantiating "'
-                . Kappa::class . '".',
+                'Not instantiable exception: "Missing required parameter "unknown" when instantiating "'
+                . Kappa::class . '"."',
             ],
         ];
     }

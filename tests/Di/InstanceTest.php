@@ -20,7 +20,7 @@ final class InstanceTest extends \PHPUnit\Framework\TestCase
     public function testConstructorException(): void
     {
         $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: The required component "id" is empty.');
+        $this->expectExceptionMessage('Invalid configuration: "The required component "id" is empty."');
 
         Instance::of('');
     }

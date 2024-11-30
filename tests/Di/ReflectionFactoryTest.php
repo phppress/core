@@ -46,7 +46,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
+            'Not instantiable exception: "Failed to instantiate component or class: "NonExistentClass"."',
         );
 
         $this->factory->create('NonExistentClass');
@@ -96,7 +96,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "' . $interfaceClass . '".',
+            'Not instantiable exception: "Failed to instantiate component or class: "' . $interfaceClass . '"."',
         );
 
         $this->factory->create($interfaceClass);
@@ -132,7 +132,9 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     public function testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter(): void
     {
         $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():137}".');
+        $this->expectExceptionMessage(
+            'Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():139}".',
+        );
 
         $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
     }
@@ -154,7 +156,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: Failed to instantiate component or class: "NonExistentClass".',
+            'Not instantiable exception: "Failed to instantiate component or class: "NonExistentClass"."',
         );
 
         $this->factory->resolveDependencies([Instance::of('NonExistentClass')]);
