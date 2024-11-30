@@ -133,7 +133,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
-            'Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():139}".'
+            'Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():139}".',
         );
 
         $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
