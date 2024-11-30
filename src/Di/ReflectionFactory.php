@@ -146,7 +146,6 @@ class ReflectionFactory
                 $className = $type instanceof ReflectionNamedType ? $type->getName() : null;
 
                 if ($param->isVariadic()) {
-                    $args = array_merge($args, array_values($params));
                     break;
                 }
 
