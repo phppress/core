@@ -152,6 +152,19 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('Third', $result[2]);
     }
 
+    public function testResolveCallableDependenciesWithVaradicParams(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
+            ['First', 'Second', 'Third'],
+        );
+
+        $this->assertCount(3, $result);
+        $this->assertSame('First', $result[0]);
+        $this->assertSame('Second', $result[1]);
+        $this->assertSame('Third', $result[2]);
+    }
+
     public function testResolveDependenciesWithNoExistingInstanceClass(): void
     {
         $this->expectException(Exception::class);
