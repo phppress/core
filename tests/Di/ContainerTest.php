@@ -68,6 +68,17 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(0, $definitionInstance->getB());
     }
 
+    public function testCreateWithConstructorArgumentIsMissing(): void
+    {
+        $this->expectException(ArgumentCountError::class);
+        $this->expectExceptionMessage(
+            'Too few arguments to function PHPPress\Tests\Di\Stub\ConstructorUnionType::__construct(), 0 ' .
+            'passed and exactly 1 expected',
+        );
+
+        new Container()->create(Stub\ConstructorUnionType::class);
+    }
+
     public function testCreateWithConstructorUnionTypeArguments(): void
     {
         $unionTypeInstance = new Container()->create(
@@ -93,15 +104,15 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorUnionType::class, $unionTypeInstance);
     }
 
-    public function testCreateWithConstructorArgumentIsMissing(): void
+    public function testCreateWithConstructorVaradicArguments(): void
     {
-        $this->expectException(ArgumentCountError::class);
-        $this->expectExceptionMessage(
-            'Too few arguments to function PHPPress\Tests\Di\Stub\ConstructorUnionType::__construct(), 0 ' .
-            'passed and exactly 1 expected',
+        $varadicInstance = new Container()->create(
+            Stub\ConstructorVaradic::class,
+            ['__construct()' => ['a', 'b', 'c']],
         );
 
-        new Container()->create(Stub\ConstructorUnionType::class);
+        $this->assertInstanceOf(Stub\ConstructorVaradic::class, $varadicInstance);
+        $this->assertSame(['a', 'b', 'c'], $varadicInstance->getValue());
     }
 
     public function testCreateWithDefinitions(): void
