@@ -212,7 +212,7 @@ class ReflectionFactory
                             continue;
                         }
 
-                        $name = $parameter?->getName();
+                        $name = $parameter->getName();
                         $class = $reflection->getName();
 
                         throw new NotInstantiable(
@@ -257,23 +257,14 @@ class ReflectionFactory
 
         if ($constructor !== null) {
             foreach ($constructor->getParameters() as $param) {
-                if ($param->isVariadic()) {
-                    break;
-                }
+                if ($param->isVariadic() === false) {
+                    $type = $param->getType();
 
-                $c = $param->getType();
-                $className = null;
-                $isClass = false;
-
-                if ($c instanceof ReflectionNamedType) {
-                    $isClass = !$c->isBuiltin();
-                    $className = $isClass ? $c->getName() : null;
-                }
-
-                if ($className !== null) {
-                    $dependencies[$param->getName()] = Instance::of($className);
-                } elseif ($param->isDefaultValueAvailable()) {
-                    $dependencies[$param->getName()] = $param->getDefaultValue();
+                    if ($type instanceof ReflectionNamedType && $type->isBuiltin() === false) {
+                        $dependencies[$param->getName()] = Instance::of($type->getName());
+                    } elseif ($param->isDefaultValueAvailable()) {
+                        $dependencies[$param->getName()] = $param->getDefaultValue();
+                    }
                 }
             }
         }
