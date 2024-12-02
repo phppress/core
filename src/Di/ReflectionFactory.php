@@ -15,9 +15,14 @@ use ReflectionFunction;
 use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionType;
 use ReflectionUnionType;
 use Throwable;
 
+use function array_key_exists;
+use function array_replace;
+use function array_shift;
 use function array_values;
 use function count;
 use function is_array;
@@ -32,8 +37,7 @@ use function is_object;
 class ReflectionFactory
 {
     /**
-     * @phpstan-var array<string, array<string|int, Instance|mixed>> Cached dependencies indexed by class/interface
-     * names. Each class name is associated with a list of constructor parameter types or default values.
+     * @var array Cached dependencies indexed by class/interface names.
      */
     private array $dependencies = [];
     /**
@@ -121,63 +125,24 @@ class ReflectionFactory
         };
 
         $args = [];
-        $associative = Arr::isAssociative($params);
 
-        foreach ($reflection->getParameters() as $param) {
-            $name = $param->getName();
-            $type = $param->getType();
+        foreach ($reflection->getParameters() as $key => $reflectionParameter) {
+            /** @var ReflectionIntersectionType|ReflectionNamedType|ReflectionUnionType $type */
+            $type = $reflectionParameter->getType();
+            $name = $reflectionParameter->getName();
+            $className = $this->getClassName($type);
 
-            $isClass = false;
-            $className = null;
+            if ($reflectionParameter->isVariadic()) {
+                $variadicArgs = [];
 
-            if ($type instanceof ReflectionUnionType || $type instanceof ReflectionIntersectionType) {
-                foreach ($type->getTypes() as $singleType) {
-                    if ($singleType instanceof ReflectionNamedType && !$singleType->isBuiltin()) {
-                        $type = $singleType;
-                        $isClass = true;
-                        break;
-                    }
+                while (count($params)) {
+                    $variadicArgs[] = $this->resolveBuiltInType($reflectionParameter, $name, $params);
                 }
-            } elseif ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-                $isClass = true;
+
+                $args = [...$args, ...$variadicArgs];
+            } else {
+                $args[] = $this->resolveDependency($reflectionParameter, $className, $name, $key, $params);
             }
-
-            if ($isClass) {
-                $className = $type instanceof ReflectionNamedType ? $type->getName() : null;
-
-                if ($param->isVariadic()) {
-                    break;
-                }
-
-                if ($className !== null) {
-                    if ($associative && isset($params[$name]) && $params[$name] instanceof $className) {
-                        $args[] = $params[$name];
-                        unset($params[$name]);
-                    } elseif (!$associative && isset($params[0]) && $params[0] instanceof $className) {
-                        $args[] = array_shift($params);
-                    } else {
-                        // If the argument is optional, we catch not instantiable exceptions
-                        $args[] = match ($param->isDefaultValueAvailable()) {
-                            true => $param->getDefaultValue(),
-                            default => $this->container->get($className),
-                        };
-                    }
-                }
-            } elseif ($associative && isset($params[$name])) {
-                $args[] = $params[$name];
-                unset($params[$name]);
-            } elseif (!$associative && count($params)) {
-                $args[] = array_shift($params);
-            } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } elseif (!$param->isOptional()) {
-                $funcName = $reflection->getName();
-                throw new InvalidConfig(Message::PARAMETER_CALLABLE_MISSING->getMessage($name, $funcName));
-            }
-        }
-
-        foreach ($params as $value) {
-            $args[] = $value;
         }
 
         return $args;
@@ -228,6 +193,34 @@ class ReflectionFactory
         }
 
         return $dependencies;
+    }
+
+    /**
+     * Extracts the class name from a reflection type.
+     *
+     * @param ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType The reflection type.
+     *
+     * @return string|null The extracted class name, or `null` if no class name is found.
+     */
+    private function getClassName(
+        ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType,
+    ): string|null {
+        if ($reflectionType instanceof ReflectionNamedType && $reflectionType->isBuiltin() === false) {
+            return $reflectionType->getName();
+        }
+
+        if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
+            /** @phpstan-var ReflectionNamedType[] $types */
+            $types = $reflectionType->getTypes();
+
+            foreach ($types as $type) {
+                if ($type->isBuiltin() === false) {
+                    return $type->getName();
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -307,11 +300,93 @@ class ReflectionFactory
     }
 
     /**
-     * Validates dependencies.
+     * Resolves dependencies for built-in type parameters.
+     *
+     * @param ReflectionParameter $reflectionParameter The parameter being resolved.
+     * @param string $name The name of the parameter.
+     * @param array $params Reference to the parameters array.
+     *
+     * @throws InvalidConfig If a required parameter cannot be resolved.
+     *
+     * @return mixed The resolved parameter value.
+     */
+    private function resolveBuiltInType(ReflectionParameter $reflectionParameter, string $name, array &$params): mixed
+    {
+        if (array_key_exists($name, $params)) {
+            $value = $params[$name];
+
+            unset($params[$name]);
+
+            return $value;
+        }
+
+        if (count($params)) {
+            return array_shift($params);
+        }
+
+        if ($reflectionParameter->isDefaultValueAvailable()) {
+            return $reflectionParameter->getDefaultValue();
+        }
+
+        throw new InvalidConfig(
+            Message::PARAMETER_CALLABLE_MISSING->getMessage(
+                $name,
+                $reflectionParameter->getDeclaringFunction()->getName(),
+            )
+        );
+    }
+
+    /**
+     * Resolves a single dependency for a method or function parameter.
+     *
+     * @param ReflectionParameter $reflectionParameter The parameter being resolved.
+     * @param string|null $className The class name of the parameter type.
+     * @param string $name The name of the parameter.
+     * @param string|int $key The key of the parameter in the parameters array.
+     * @param array $params Reference to the parameters array.
+     *
+     * @throws InvalidConfig If a required dependency cannot be resolved.
+     *
+     * @return mixed The resolved dependency.
+     */
+    private function resolveDependency(
+        ReflectionParameter $reflectionParameter,
+        string|null $className,
+        string $name,
+        string|int $key,
+        array &$params
+    ): mixed {
+        if ($className === null) {
+            return $this->resolveBuiltInType($reflectionParameter, $name, $params);
+        }
+
+        if (array_key_exists($name, $params)) {
+            $value = $params[$name];
+
+            unset($params[$name]);
+
+            return $value;
+        }
+
+        if (array_key_exists(0, $params) && $params[0] instanceof $className) {
+            return array_shift($params);
+        }
+
+        if ($reflectionParameter->isDefaultValueAvailable()) {
+            return $reflectionParameter->getDefaultValue();
+        }
+
+        unset($params[$key]);
+
+        return $this->container->get($className);
+    }
+
+    /**
+     * Validates the format of dependencies passed during object creation.
      *
      * @param array $parameters The parameters to validate.
      *
-     * @throws InvalidConfig If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
+     * @throws InvalidConfig If dependencies are not in the correct format.
      */
     private function validateDependencies(array $parameters): void
     {

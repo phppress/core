@@ -108,11 +108,45 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
     {
         $varadicInstance = new Container()->create(
             Stub\ConstructorVaradic::class,
-            ['__construct()' => ['a', 'b', 'c']],
+            ['__construct()' => [200, 'a', 'b', 'c']],
         );
 
         $this->assertInstanceOf(Stub\ConstructorVaradic::class, $varadicInstance);
+        $this->assertsame(200, $varadicInstance->getKey());
         $this->assertSame(['a', 'b', 'c'], $varadicInstance->getValue());
+    }
+
+    public function testCreateWithConstructorVaradicMixedArguments(): void
+    {
+        $varadicInstance = new Container()->create(
+            Stub\ConstructorVaradicMixed::class,
+            ['__construct()' => [1, 'a', 2.3]],
+        );
+
+        $this->assertInstanceOf(Stub\ConstructorVaradicMixed::class, $varadicInstance);
+        $this->assertSame([1, 'a', 2.3], $varadicInstance->getValue());
+    }
+
+    public function testCreateWithConstructorVaradicNotTypeHintArguments(): void
+    {
+        $varadicInstance = new Container()->create(
+            Stub\ConstructorVaradicNotTypeHint::class,
+            ['__construct()' => [1, 'a', 2.3]],
+        );
+
+        $this->assertInstanceOf(Stub\ConstructorVaradicNotTypeHint::class, $varadicInstance);
+        $this->assertSame([1, 'a', 2.3], $varadicInstance->getValue());
+    }
+
+    public function testCreateWithConstructorVaradicUnionTypeArguments(): void
+    {
+        $varadicInstance = new Container()->create(
+            Stub\ConstructorUnionTypeVaradic::class,
+            ['__construct()' => [true, 1, 'a']],
+        );
+
+        $this->assertInstanceOf(Stub\ConstructorUnionTypeVaradic::class, $varadicInstance);
+        $this->assertSame([true, 1, 'a'], $varadicInstance->getValue());
     }
 
     public function testCreateWithDefinitions(): void
