@@ -90,7 +90,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(5, $engineInstance->getNumber());
     }
 
-    public function testCreateObjectNotInstantiable(): void
+    public function testCreateObjectWithNotInstantiableClass(): void
     {
         $interfaceClass = Stub\EngineInterface::class;
 
@@ -102,7 +102,17 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->factory->create($interfaceClass);
     }
 
-    public function testResolveCallableDependenciesWithAssociativeParams(): void
+    public function testResolveCallableDependenciesWithInvalidConfigForMissingRequiredParameter(): void
+    {
+        $this->expectException(InvalidConfig::class);
+        $this->expectExceptionMessage(
+            'Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesWithInvalidConfigForMissingRequiredParameter():112}"."',
+        );
+
+        $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
+    }
+
+    public function testResolveCallableDependenciesWithParamsIsAsociativeArray(): void
     {
         $betaInstance = new Stub\Beta();
 
@@ -115,7 +125,31 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($betaInstance, $result[0]);
     }
 
-    public function testResolveCallableDependenciesWithNonAssociativeParams(): void
+    public function testResolvableCallableDependenciesWithParamsIsAsociativeArrayClass(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(Stub\Beta $param1, Stub\Beta $param2): array => ['params1' => $param1, 'params2' => $param2],
+            [Stub\Beta::class, Stub\Beta::class],
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(Stub\Beta::class, $result[0]);
+        $this->assertInstanceOf(Stub\Beta::class, $result[1]);
+    }
+
+    public function testResolvableCallableDependenciesWithParamsIsAsociativeInstanceClass(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(Stub\Beta $param1, Stub\Beta $param2): array => ['params1' => $param1, 'params2' => $param2],
+            [Instance::of(Stub\Beta::class), Instance::of(Stub\Beta::class)],
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(Stub\Beta::class, $result[0]);
+        $this->assertInstanceOf(Stub\Beta::class, $result[1]);
+    }
+
+    public function testResolveCallableDependenciesWithParamsIsListArray(): void
     {
         $betaInstance = new Stub\Beta();
 
@@ -129,43 +163,80 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($result[1]);
     }
 
-    public function testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter(): void
-    {
-        $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage(
-            'Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():139}".',
-        );
-
-        $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
-    }
-
-    public function testResolveCallableDependenciesHandlesAdditionalParams(): void
+    public function testResolvableCallableDependenciesWithParamsIsListArrayClass(): void
     {
         $result = $this->factory->resolveCallableDependencies(
-            static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
+            static fn(Stub\Beta $param1, Stub\Beta $param2): array => [$param1, $param2],
+            [Stub\Beta::class, Stub\Beta::class],
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(Stub\Beta::class, $result[0]);
+        $this->assertInstanceOf(Stub\Beta::class, $result[1]);
+    }
+
+    public function testResolvableCallableDependenciesWithParamsIsListArrayInstanceClass(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(Stub\Beta $param1, Stub\Beta $param2): array => [$param1, $param2],
+            [Instance::of(Stub\Beta::class), Instance::of(Stub\Beta::class)],
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(Stub\Beta::class, $result[0]);
+        $this->assertInstanceOf(Stub\Beta::class, $result[1]);
+    }
+
+    public function testResolveCallableDependenciesWithStaticFunctionLastArgumentIsOptionalAndVaradic(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(string $param1, null $optionalParams): array => [$param1, $additionalParams],
             ['First', 'Second', 'Third'],
         );
 
-        $this->assertCount(3, $result);
+        $this->assertCount(2, $result);
         $this->assertSame('First', $result[0]);
         $this->assertSame('Second', $result[1]);
-        $this->assertSame('Third', $result[2]);
     }
 
-    public function testResolveCallableDependenciesWithVaradicParams(): void
+    public function testResolveCallableDependenciesWithStaticFunctionNotTypehint(): void
     {
         $result = $this->factory->resolveCallableDependencies(
-            static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
-            ['First', 'Second', 'Third'],
+            static fn($value) => $value !== null,
+            ['test'],
         );
 
-        $this->assertCount(3, $result);
-        $this->assertSame('First', $result[0]);
-        $this->assertSame('Second', $result[1]);
-        $this->assertSame('Third', $result[2]);
+        $this->assertCount(1, $result);
+        $this->assertSame('test', $result[0]);
     }
 
-    public function testResolveDependenciesWithNoExistingInstanceClass(): void
+    public function testResolveCallableDependenciesWithStaticFunctionPrimitiveTypehint(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(string|null $value = null) => $value,
+            ['value' => 'test'],
+        );
+
+        $this->assertCount(1, $result);
+        $this->assertSame('test', $result[0]);
+    }
+
+    public function testResolveCallableDependenciesWithStaticFunctionLastArgumentIsVaradic(): void
+    {
+        $result = $this->factory->resolveCallableDependencies(
+            static fn(string $param1, string ...$additionalParams): array => [$param1, $additionalParams],
+            [
+                'param1' => 'First',
+                'additionalParams' => ['joe', 'doe'],
+            ],
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertSame('First', $result[0]);
+        $this->assertSame(['joe', 'doe'], $result[1]);
+    }
+
+    public function testResolveDependenciesWithExceptionForNonExistentClass(): void
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(
@@ -175,7 +246,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         $this->factory->resolveDependencies([Instance::of('NonExistentClass')]);
     }
 
-    public function testValidateDependenciesThrowsExceptionForMixedIndexing(): void
+    public function testValidateDependenciesWithInvalidConfigExceptionForMixedIndexing(): void
     {
         $this->expectException(InvalidConfig::class);
         $this->expectExceptionMessage(
