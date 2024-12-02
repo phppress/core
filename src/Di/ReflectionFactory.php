@@ -332,7 +332,7 @@ class ReflectionFactory
             Message::PARAMETER_CALLABLE_MISSING->getMessage(
                 $name,
                 $reflectionParameter->getDeclaringFunction()->getName(),
-            )
+            ),
         );
     }
 
@@ -354,7 +354,7 @@ class ReflectionFactory
         string|null $className,
         string $name,
         string|int $key,
-        array &$params
+        array &$params,
     ): mixed {
         if ($className === null) {
             return $this->resolveBuiltInType($reflectionParameter, $name, $params);
