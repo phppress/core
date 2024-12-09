@@ -10,10 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class ClassWithConstructorNullValue
 {
-    public function __invoke()
+    public function __construct(private readonly EngineCar|null $car = null) {}
+
+    public function getCar(): EngineCar|null
     {
-        return 'invoked';
+        return $this->car;
     }
 }

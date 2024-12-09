@@ -10,7 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class FooProperty
+final class ClassInvokeableWithoutType
 {
-    public BarSetter $bar;
+    public function __invoke($value = 0): mixed
+    {
+        return $value;
+    }
 }

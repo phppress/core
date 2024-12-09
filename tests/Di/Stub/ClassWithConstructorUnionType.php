@@ -10,7 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class StaticUnionType
+final class ClassWithConstructorUnionType
 {
-    public static function engineCar(EngineMarkOne|EngineMarkTwo $value): void {}
+    public function __construct(protected string|int|float|bool|null $value) {}
+
+    public function getValue(): string|int|float|bool|null
+    {
+        return $this->value;
+    }
 }

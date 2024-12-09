@@ -10,7 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class CarTunning
+final class ClassWithConstructorDefaultValue
 {
-    public function __construct(public string|null $color = null) {}
+    public function __construct(private string $value = 'default') {}
+
+    public function getValue(): string
+    {
+        return $this->value;
+    }
 }

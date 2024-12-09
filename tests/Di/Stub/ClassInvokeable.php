@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Stub class for testing.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class ConstructorNullValueArgumentDefault
+final class ClassInvokeable
 {
-    public function __construct(private readonly Car|null $car = null) {}
-
-    public function getCar(): Car|null
+    public function __invoke(ContainerInterface $container): EngineCar
     {
-        return $this->car;
+        $engine = $container->get(EngineInterface::class);
+
+        return new EngineCar($engine);
     }
 }

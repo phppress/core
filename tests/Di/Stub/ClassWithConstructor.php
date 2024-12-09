@@ -10,7 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class UnionTypeNull
+final class ClassWithConstructor
 {
-    public function __construct(protected string|int|float|bool|null $value) {}
+    public function __construct(private readonly ClassInstance $definitionClass) {}
+
+    public function getDefinitionClass(): ClassInstance
+    {
+        return $this->definitionClass;
+    }
 }

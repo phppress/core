@@ -12,11 +12,11 @@ use PHPPress\Di\Container;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class DefinitionStaticClassFactory
+final class ClassStaticFactory
 {
     public static function create(Container $container): object
     {
-        $definitionClass = $container->get(DefinitionClass::class);
+        $definitionClass = $container->get(ClassInstance::class);
         $definitionClass->setA(42);
 
         return $definitionClass;
