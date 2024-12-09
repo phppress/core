@@ -10,10 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-interface DefinitionClassInterface
+final class ClassInvokeableWithVaradic
 {
-    public function getA(): int;
-    public function getB(): int;
-    public function setA(int $a): void;
-    public function setB(int $b): void;
+    public function __invoke(string|int ...$value): array
+    {
+        return $value;
+    }
 }

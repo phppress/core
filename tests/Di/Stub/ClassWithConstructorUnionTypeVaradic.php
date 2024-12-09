@@ -10,18 +10,13 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class ConstructorVaradic
+final class ClassWithConstructorUnionTypeVaradic
 {
     private array $value = [];
 
-    public function __construct(private int $key, string ...$value)
+    public function __construct(string|int|float|bool ...$value)
     {
         $this->value = $value;
-    }
-
-    public function getKey(): int
-    {
-        return $this->key;
     }
 
     public function getValue(): array

@@ -10,7 +10,7 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Hook
+final class ClassHook
 {
     public string $firstName {
         set(string $name) => ucfirst($name);

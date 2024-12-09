@@ -10,8 +10,9 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class EngineMarkTwo implements EngineInterface
+final class EngineMarkTwo implements EngineInterface, EngineColorInterface
 {
+    private string $color = 'red';
     public const NAME = 'Mark Two';
     public const NUMBER = 2;
 
@@ -30,5 +31,15 @@ final class EngineMarkTwo implements EngineInterface
     public function getNumber(): int
     {
         return $this->number;
+    }
+
+    public function getColor(): string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $value): void
+    {
+        $this->color = $value;
     }
 }

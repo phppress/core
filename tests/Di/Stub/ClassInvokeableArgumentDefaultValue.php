@@ -10,7 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class StaticUnionType
+final class ClassInvokeableArgumentDefaultValue
 {
-    public static function engineCar(EngineMarkOne|EngineMarkTwo $value): void {}
+    public function __invoke(string $value = 'default'): string
+    {
+        return $value;
+    }
 }

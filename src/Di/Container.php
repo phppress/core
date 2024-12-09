@@ -6,12 +6,10 @@ namespace PHPPress\Di;
 
 use PHPPress\Di\Exception\{Message, NotInstantiable};
 use PHPPress\Exception\InvalidConfig;
-use PHPPress\Helper\Arr;
 use Psr\Container\ContainerInterface;
 use Throwable;
 
 use function array_key_exists;
-use function array_merge;
 use function gettype;
 use function is_array;
 use function is_callable;
@@ -20,21 +18,25 @@ use function is_string;
 use function str_contains;
 
 /**
- * Container implements a [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) container.
+ * Container implements a dependency injection (DI) container for managing object creation and dependencies.
  *
- * A dependency injection (DI) container is an object that knows how to instantiate and configure objects and all their
- * dependent objects.
+ * Key features:
+ * - Supports constructor and property injection.
+ * - Manages object lifecycles (singleton and transient).
+ * - Autowiring capabilities.
+ * - Flexible definition of dependencies.
  *
- * Container supports constructor injection as well as property injection.
+ * The container can:
+ * - Automatically resolve and instantiate class dependencies.
+ * - Configure and inject dependencies.
+ * - Cache and reuse singleton instances.
  *
- * To use Container, you first need to set up the class dependencies by calling [[set()]].
- *
- * You then call [[get()]] to create a new class object. The Container will automatically instantiate dependent objects,
- * inject them into the object being created, configure, and finally return the newly created object.
- *
- * Below is an example of using Container:
- *
+ * Usage example:
  * ```php
+ * $container = new Container();
+ * $container->set(DatabaseInterface::class, MySqlDatabase::class);
+ * $container->setSingleton(Logger::class);
+ * $database = $container->get(DatabaseInterface::class);
  * ```
  *
  * For more information about DI, please refer to:
@@ -46,58 +48,69 @@ use function str_contains;
 class Container implements ContainerInterface
 {
     /**
-     * @var array Object definitions indexed by their types.
+     * @var ReflectionFactory The factory for creating objects for dependency injection.
+     *
+     * @phpstan-ignore property.onlyRead
      */
-    private array $definitions = [];
-    /**
-     * @var array Singleton objects indexed by their types.
-     */
-    private array $singletons = [];
-    /**
-     * @var ReflectionFactory|null The factory for creating objects for dependency injection.
-     */
-    private ReflectionFactory|null $reflectionFactory = null;
-
-    /**
-     * Removes all previously registered services from the container.
-     */
-    public function clear(): void
-    {
-        $this->definitions = [];
-        $this->singletons = [];
+    private ReflectionFactory $reflectionFactory {
+        get => $this->reflectionFactory ??= new ReflectionFactory($this);
     }
 
     /**
-     * Creates a new instance of the specified class with defined properties and method calls.
+     * Initializes the dependency injection container with optional definitions and singletons.
      *
-     * @param string $class The fully qualified class name to instantiate.
-     * @param array $definitions An associative array defining constructor parameters, property values, and method
-     * calls:
-     *  - `'__construct()' => ['param1', 'param2']`: Calls the constructor with the specified parameters. If a parameter
-     *    is omitted, the class's default value is used. Named arguments can also be used.
-     *    e.g., `['__construct()' => ['paramName' => 'value']]`.
-     *  - `'propertyName' => 'value'`: Sets the specified property to the given value.
-     *  - `'methodName()' => ['param']`: Invokes the method with the provided parameters.
+     * @param array $definitions Pre-configured object definitions to register.
+     * - Keys are class/interface names.
+     * - Values are class definitions, callables, or instances.
+     * - Default includes ContainerInterface mapped to the current container.
      *
-     * @throws InvalidConfig If the class cannot be recognized or the definitions are invalid.
-     * @throws NotInstantiable If the resolved class is abstract or an interface.
-     * @throws Throwable If a circular reference is detected during instantiation.
+     * @param array $singletons Pre-configured singleton object definitions.
+     * - Keys are class/interface names.
+     * - Values are singleton object configurations.
+     * - Ensures only one instance of specified classes will be created.
      *
-     * @return mixed The newly created and configured instance of the specified class.
+     * @throws InvalidConfig If any provided definitions are invalid.
+     *
+     * ```php
+     * $container = new Container(
+     *     [
+     *         LoggerInterface::class => FileLogger::class,
+     *     ],
+     *     [
+     *         ConfigManager::class => $configManagerInstance,
+     *     ],
+     * );
+     * ```
      */
-    public function create(string $class, array $definitions = []): mixed
-    {
-        return $this->getInternal($class, $definitions);
+    public function __construct(
+        private array $definitions = [],
+        private array $singletons = [],
+    ) {
+        $definitions += [
+            ContainerInterface::class => self::class,
+            self::class => $this,
+        ];
+
+        $this->setDefinitions($definitions);
+
+        if ($this->singletons !== []) {
+            $this->setSingletons($singletons);
+        }
     }
 
     /**
      * Retrieves a dependency from the container.
      *
-     * @param string $id The dependency 'id' (typically a class or interface name).
+     * @param string $id The fully qualified class name, interface name, or alias of the dependency to retrieve.
      *
-     * @throws NotInstantiable If the dependency cannot be resolved.
+     * @throws NotInstantiable If the dependency cannot be instantiated or resolved.
+     * @throws InvalidConfig If the requested dependency has an invalid configuration.
      *
-     * @return mixed The resolved dependency.
+     * @return mixed The fully resolved and instantiated dependency.
+     *
+     * @phpstan-template T
+     * @phpstan-param class-string<T> $id
+     * @phpstan-return T
      */
     public function get(string $id): mixed
     {
@@ -120,17 +133,22 @@ class Container implements ContainerInterface
     }
 
     /**
-     * Returns a value indicating whether the container has the definition of the specified name.
+     * Checks if a dependency exists in the container.
      *
-     * @param string $id The class name, interface name or alias name.
+     * @param string $id The fully qualified class name, interface name, or alias to check.
      *
-     * @return bool Whether the container has the definition of the specified name.
+     * @return bool Returns true if the dependency exists in the container, false otherwise.
+     *
+     * This method checks for:
+     * - Explicitly registered definitions.
+     * - Registered singletons.
+     * - Autowirable classes.
      *
      * @see set()
      */
     public function has(string $id): bool
     {
-        $autowired = $this->reflectionFactory()->canBeAutowired($id);
+        $autowired = $this->reflectionFactory->canBeAutowired($id);
 
         return isset($this->definitions[$id]) || isset($this->singletons[$id]) || $autowired;
     }
@@ -147,6 +165,144 @@ class Container implements ContainerInterface
     public function hasSingleton(string $class, bool $checkInstance = false): bool
     {
         return $checkInstance ? isset($this->singletons[$class]) : array_key_exists($class, $this->singletons);
+    }
+
+    /**
+     * Registers a class definition with the container.
+     *
+     * @param string $class The fully qualified class name, interface name, or alias to register.
+     * @param mixed $definitions The definition for the class. Can be:
+     * - A callable function with signature `function ($container, $params)`.
+     * - An array of configuration options.
+     * - A string representing another class name.
+     * - An object instance.
+     *
+     * @throws InvalidConfig If the provided definition is invalid or cannot be processed.
+     *
+     * @return static The container instance for method chaining.
+     *
+     * ```php
+     * $container->set(
+     *     LoggerInterface::class,
+     *     static function($container) {
+     *         return new FileLogger('/path/to/logs');
+     *     },
+     * );
+     *
+     * $container->set(
+     *     Database::class,
+     *     [
+     *         'class' => MySqlDatabase::class,
+     *         'host' => 'localhost',
+     *         'port' => 3306,
+     *     ],
+     * );
+     * ```
+     */
+    public function set(string $class, mixed $definitions = []): static
+    {
+        $this->definitions[$class] = $this->normalizeDefinition($class, $definitions);
+
+        unset($this->singletons[$class]);
+
+        return $this;
+    }
+
+    /**
+     * Registers a class definition as a singleton within the container.
+     *
+     * @param string $class The fully qualified class name, interface name, or alias to register.
+     * @param mixed $definition The definition for the singleton. Can include:
+     * - Property configurations.
+     * - Method call configurations.
+     * - Initialization parameters.
+     *
+     * @throws InvalidConfig If the provided definition is invalid or cannot be processed.
+     *
+     * @return static The container instance for method chaining.
+     *
+     * Note: Singleton instances are created once and reused for subsequent retrievals.
+     *
+     * ```php
+     * $container->setSingleton(
+     *     ConfigManager::class,
+     *     [
+     *         'configPath' => '/etc/myapp/config.json',
+     *         'loadEnvironment()' => ['production']
+     *     ],
+     * );
+     * ```
+     *
+     * @see set()
+     */
+    public function setSingleton(string $class, mixed $definition = []): static
+    {
+        $this->definitions[$class] = $this->normalizeDefinition($class, $definition);
+        $this->singletons[$class] = null;
+
+        return $this;
+    }
+
+    /**
+     * Returns an instance of the requested class.
+     *
+     * Note that if the class is declared to be singleton by calling [[setSingleton()]], the same instance of the class
+     * will be returned each time this method is called.
+     *
+     * @param string $id The class Instance, name, or an alias name (e.g. `foo`) that was previously registered
+     * via [[set()]] or [[setSingleton()]].
+     *
+     * @throws InvalidConfig If the class cannot be recognized or correspond to an invalid definition.
+     * @throws NotInstantiable If resolved to an abstract class or an interface.
+     * @throws Throwable In case of circular references.
+     *
+     * @return mixed The entry of the container.
+     */
+    private function getInternal(string $id): mixed
+    {
+        if ($id === ContainerInterface::class || $id === self::class) {
+            return $this;
+        }
+
+        if ($this->hasSingleton($id, true)) {
+            return $this->singletons[$id];
+        }
+
+        $definition = $this->definitions[$id] ?? null;
+        $entry = null;
+
+        if ($definition === null) {
+            $entry = $this->reflectionFactory->create($id);
+
+            if (is_callable($entry, true)) {
+                $entry = $this->invoke($entry);
+            }
+
+            return $entry;
+        }
+
+        if (is_callable($definition, true)) {
+            $entry = $this->invoke($definition);
+        } elseif (is_array($definition)) {
+            $concrete = $definition['class'];
+            $definition = $this->definitions[$concrete] ?? $definition;
+
+            unset($definition['class']);
+
+            $entry = $this->reflectionFactory->create($concrete, $definition);
+
+            if (is_callable($entry, true)) {
+                $entry = $this->invoke($entry, $definition['__invoke()'] ?? []);
+            }
+        } elseif (is_object($definition)) {
+            return $this->singletons[$id] = $definition;
+        }
+
+        if (array_key_exists($id, $this->singletons)) {
+            $this->singletons[$id] = $entry;
+        }
+
+        return $entry;
     }
 
     /**
@@ -167,225 +323,16 @@ class Container implements ContainerInterface
      * @param array $params The array of parameters for the function. This can be either a list of parameters or an
      * associative array representing named function parameters.
      *
-     * @throws InvalidConfig If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
-     * @throws NotInstantiable If the dependency cannot be resolved.
-     * @throws Throwable If the callback is not valid, callable.
-     *
      * @return mixed The callback return value.
      */
-    public function invoke(callable $callback, array $params = []): mixed
+    private function invoke(callable $callback, array $params = []): mixed
     {
-        try {
-            return call_user_func_array(
-                $callback,
-                $this->reflectionFactory()->resolveCallableDependencies($callback, $params),
-            );
-        } catch (Throwable $e) {
-            throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($e->getMessage()));
-        }
+        return call_user_func_array(
+            $callback,
+            $this->reflectionFactory->resolveCallableDependencies($callback, $params),
+        );
     }
 
-    /**
-     * Resolve dependencies for a function.
-     *
-     * This method can be used to implement similar functionality as provided by [[invoke()]] in other components.
-     *
-     * @param callable $callback The callable to be invoked.
-     * @param array $params The array of parameters for the function can be either numeric or associative.
-     *
-     * @throws InvalidConfig If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
-     * @throws Throwable If the callback is not valid, callable.
-     *
-     * @return array The resolved dependencies.
-     */
-    public function resolveCallableDependencies(callable $callback, array $params = []): array
-    {
-        return $this->reflectionFactory()->resolveCallableDependencies($callback, $params);
-    }
-
-    /**
-     * Registers a class definition with this container.
-     *
-     * For example,
-     *
-     * ```php
-     * ```
-     *
-     * If a class definition with the same name already exists, it will be overwritten with the new one.
-     * You may use [[has()]] to check if a class definition already exists.
-     *
-     * @param string $class The class name, interface name or alias name.
-     * @param mixed $definitions The definition associated with `$class`. It can be one of the following:
-     * - a PHP callable: The callable will be executed when [[get()]] is invoked. The signature of the callable should
-     *   be `function ($container, $params, $config)`, where `$params` stands for the list of constructor parameters,
-     *   `$config` the object definition, and `$container` the container object. The return value of the callable will
-     *   be returned by [[get()]] as the object instance requested.
-     * - a definition array: the array contains name-value pairs that will be used to initialize the property or method
-     *   values of the newly created object when [[get()]] is called. The `class` element stands for the class of the
-     *   object to be created. If `class` is not specified, `$class` will be used as the class name.
-     * - a string: a class name, an interface name or an alias name.
-     *
-     * @throws InvalidConfig if the definition is invalid.
-     *
-     * @return static The container itself.
-     */
-    public function set(string $class, mixed $definitions = []): static
-    {
-        $this->definitions[$class] = $this->normalizeDefinition($class, $definitions);
-
-        unset($this->singletons[$class]);
-
-        return $this;
-    }
-
-    /**
-     * Registers class definitions within this container.
-     *
-     * @param array $definitions The array of definitions. There are two allowed formats of an array.
-     * The first format:
-     *  - key: the class name, interface name or alias name. The key will be passed to the [[set()]] method as a first
-     *    argument `$class`.
-     *  - value: the definition associated with `$class`. Possible values are described in
-     *    [[set()]] documentation for the `$definition` parameter. It Will be passed to the [[set()]] method as the
-     *    second argument `$definition`.
-     *
-     * Example:
-     * ```php
-     * ```
-     *
-     * The second format:
-     *  - key: class name, interface name or alias name. The key will be passed to the [[set()]] method as a first
-     *    argument `$class`.
-     *  - value: array of two elements. The first element will be passed the [[set()]] method as the second argument
-     *    `$definition`, the second one — as `$params`.
-     *
-     * Example:
-     * ```php
-     * ```
-     *
-     * @throws InvalidConfig If a definition is invalid.
-     *
-     * @see set() to know more about possible values of definitions.
-     */
-    public function setDefinitions(array $definitions): void
-    {
-        if (Arr::isList($definitions)) {
-            return;
-        }
-
-        foreach ($definitions as $class => $definition) {
-            $this->set($class, $definition);
-        }
-    }
-
-    /**
-     * Registers a class definition with this container and marks the class as a singleton class.
-     *
-     * This method is similar to [[set()]] except that classes registered via this method will only have one instance.
-     *
-     * Each time [[get()]] is called, the same instance of the specified class will be returned.
-     *
-     * @param string $class The class name, interface name or alias name.
-     * @param array $definition The property values (name-value pairs) given in terms of property names or methods.
-     * - keys are property names with their corresponding values.
-     *   e.g. `'propertyName' => 'value'`.
-     * - method names (ending with `()`) are keys with an array of parameters as values.
-     *   e.g. `'methodName()' => ['param1', 'param2']`.
-     *
-     * @throws InvalidConfig If the definition is invalid.
-     *
-     * @return static The container itself.
-     *
-     * @see set()
-     */
-    public function setSingleton(string $class, mixed $definition = []): static
-    {
-        $this->definitions[$class] = $this->normalizeDefinition($class, $definition);
-        $this->singletons[$class] = null;
-
-        return $this;
-    }
-
-    /**
-     * Registers class definitions as singletons within this container by calling [[setSingleton()]].
-     *
-     * @param array $singletons The array of singleton definitions. See [[setDefinitions()]] for allowed formats of an
-     * array.
-     *
-     * @throws InvalidConfig If a definition is invalid.
-     *
-     * @see setSingleton() to know more about possible values of definitions.
-     * @see setDefinitions() for allowed formats of $singletons parameter.
-     */
-    public function setSingletons(array $singletons): void
-    {
-        if (Arr::isList($singletons)) {
-            return;
-        }
-
-        foreach ($singletons as $class => $definition) {
-            $this->setSingleton($class, $definition);
-        }
-    }
-
-    /**
-     * Returns an instance of the requested class.
-     *
-     * Note that if the class is declared to be singleton by calling [[setSingleton()]], the same instance of the class
-     * will be returned each time this method is called.
-     *
-     * @param string $id The class Instance, name, or an alias name (e.g. `foo`) that was previously registered
-     * via [[set()]] or [[setSingleton()]].
-     * @param array $definitions An associative array defining constructor parameters, property values, and method
-     * calls:
-     *  - `'__construct()' => ['param1', 'param2']`: Calls the constructor with the specified parameters. If a parameter
-     *    is omitted, the class's default value is used. Named arguments can also be used.
-     *    e.g., `['__construct()' => ['paramName' => 'value']]`.
-     *  - `'propertyName' => 'value'`: Sets the specified property to the given value.
-     *  - `'methodName()' => ['param']`: Invokes the method with the provided parameters.
-     *
-     * @throws InvalidConfig If the class cannot be recognized or correspond to an invalid definition.
-     * @throws NotInstantiable If resolved to an abstract class or an interface.
-     * @throws Throwable In case of circular references.
-     *
-     * @return mixed The entry of the container.
-     */
-    protected function getInternal(string $id, array $definitions = []): mixed
-    {
-        if ($this->hasSingleton($id, true)) {
-            return $this->singletons[$id];
-        }
-
-        if (!isset($this->definitions[$id])) {
-            return $this->reflectionFactory()->create($id, $definitions);
-        }
-
-        $definition = $this->definitions[$id];
-        $entry = null;
-
-        if (is_callable($definition, true)) {
-            $entry = $definition($this, $definitions);
-        } elseif (is_array($definition)) {
-            $concrete = $definition['class'];
-
-            unset($definition['class']);
-
-            $definitions = array_merge($definition, $definitions);
-
-            $entry = match ($concrete === $id) {
-                true => $this->reflectionFactory()->create($id, $definitions),
-                default => $this->create($concrete, $definitions),
-            };
-        } elseif (is_object($definition)) {
-            return $this->singletons[$id] = $definition;
-        }
-
-        if (array_key_exists($id, $this->singletons)) {
-            $this->singletons[$id] = $entry;
-        }
-
-        return $entry;
-    }
 
     /**
      * Normalizes the class definition.
@@ -397,14 +344,14 @@ class Container implements ContainerInterface
      *
      * @return array|callable|string|object The normalized class definition.
      */
-    protected function normalizeDefinition(string $class, mixed $definition): array|callable|string|object
+    private function normalizeDefinition(string $class, mixed $definition): array|callable|string|object
     {
-        if (empty($definition)) {
+        if ($definition === null || $definition === []) {
             return ['class' => $class];
         }
 
         if (is_string($definition)) {
-            if ($this->reflectionFactory()->canBeAutowired($definition) === false) {
+            if ($this->reflectionFactory->canBeAutowired($definition) === false) {
                 throw new InvalidConfig(Message::DEFINITION_INVALID->getMessage($class, $definition));
             }
 
@@ -440,12 +387,76 @@ class Container implements ContainerInterface
         throw new InvalidConfig(Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
     }
 
-    protected function reflectionFactory(): ReflectionFactory
+    /**
+     * Registers multiple class definitions within the container.
+     *
+     * @param array $definitions Definitions array with two supported formats:
+     * 1. Simple format: [className]
+     * 2. Complex format: [className => definitionConfig]
+     *
+     * @throws InvalidConfig If any definition is invalid.
+     *
+     * ```php
+     * // Simple format
+     * $this->setDefinitions([UserService::class, LoggerInterface::class]);
+     *
+     * // Complex format
+     * $this->setDefinitions(
+     *     [
+     *         DatabaseInterface::class => MySqlDatabase::class,
+     *         CacheInterface::class => [
+     *             'class' => RedisCache::class,
+     *             'host' => 'localhost'
+     *         ],
+     *     ],
+     * );
+     * ```
+     *
+     * @see set() to know more about possible values of definitions.
+     */
+    private function setDefinitions(array $definitions): void
     {
-        if ($this->reflectionFactory === null) {
-            $this->reflectionFactory = new ReflectionFactory($this);
+        foreach ($definitions as $class => $definition) {
+            match (is_int($class) && is_string($definition)) {
+                true => $this->set($definition),
+                default => $this->set($class, $definition),
+            };
         }
+    }
 
-        return $this->reflectionFactory;
+    /**
+     * Registers multiple class definitions as singletons within the container.
+     *
+     * @param array $definitions Singleton definitions array with two supported formats:
+     *   1. Simple format: [singletonClassName]
+     *   2. Complex format: [singletonClassName => definitionConfig]
+     *
+     * @throws InvalidConfig If any singleton definition is invalid.
+     *
+     * ```php
+     * // Simple format
+     * $this->setSingletons([ConfigManager::class, Logger::class]);
+     *
+     * // Complex format
+     * $this->setSingletons(
+     *     [
+     *         ConfigManager::class => [
+     *             'configPath' => '/app/config.json'
+     *         ],
+     *     ],
+     * );
+     * ```
+     *
+     * @see setSingleton() to know more about possible values of definitions.
+     * @see setDefinitions() for allowed formats of $singletons parameter.
+     */
+    private function setSingletons(array $definitions): void
+    {
+        foreach ($definitions as $class => $definition) {
+            match (is_int($class) && is_string($definition)) {
+                true => $this->setSingleton($definition),
+                default => $this->setSingleton($class, $definition),
+            };
+        }
     }
 }
