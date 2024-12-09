@@ -865,7 +865,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ClassInstance::class, $instance);
     }
 
-    public function testInvokeableClass(): void
+    public function testInvokeable(): void
     {
         $container = $this->createContainer(
             [
@@ -878,23 +878,16 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\EngineCar::class, $instance);
     }
 
-    public function testInvokeableClassWithoutTypeHint(): void
+    public function testInvokeableUsingArgumentDefaultValue(): void
     {
-        $container = $this->createContainer(
-            [
-                'instance' => [
-                    '__class' => Stub\ClassInvokeableWithoutType::class,
-                    '__invoke()' => [42],
-                ],
-            ],
-        );
+        $container = $this->createContainer();
 
-        $instance = $container->get('instance');
+        $instance = $container->get(Stub\ClassInvokeableArgumentDefaultValue::class);
 
-        $this->assertSame(42, $instance);
+        $this->assertSame('default', $instance);
     }
 
-    public function testInvokeableClassWithIntersectionType(): void
+    public function testInvokeableUsingIntersectionType(): void
     {
         $container = $this->createContainer(
             [
@@ -910,7 +903,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('blue', $instance);
     }
 
-    public function testInvokeableClassWithIntersectionTypeException(): void
+    public function testInvokeableUsingIntersectionTypeException(): void
     {
         $container = $this->createContainer(
             [
@@ -926,7 +919,53 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $container->get(Stub\ClassInvokeableWithIntersectionType::class);
     }
 
-    public function testInvokeableClassWithOptionalArguments(): void
+    public function testInvokeableUsingUnionType(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
+                'instance' => Stub\ClassInvokeableWithUnionType::class,
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertSame('Mark One', $instance);
+    }
+
+    public function testInvokeableUsingVaradic(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableWithVaradic::class,
+                    '__invoke()' => [1, 2, 3],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertSame([1, 2, 3], $instance);
+    }
+
+    public function testInvokeableUsingWithoutTypeHint(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableWithoutType::class,
+                    '__invoke()' => [42],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertSame(42, $instance);
+    }
+
+    public function testInvokeableWithOptionalArguments(): void
     {
         $container = $this->createContainer();
 
@@ -935,7 +974,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($instance);
     }
 
-    public function testInvokeableClassWithOptionalArgumentsUsingDefinitions(): void
+    public function testInvokeableWithOptionalArgumentsUsingDefinitions(): void
     {
         $container = $this->createContainer(
             [
@@ -983,37 +1022,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
     }
 
-    public function testInvokeableClassUsingUnionType(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
-                'instance' => Stub\ClassInvokeableWithUnionType::class,
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertSame('Mark One', $instance);
-    }
-
-    public function testInvokeableClassUsingVaradic(): void
-    {
-        $container = $this->createContainer(
-            [
-                'instance' => [
-                    '__class' => Stub\ClassInvokeableWithVaradic::class,
-                    '__invoke()' => [1, 2, 3],
-                ],
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertSame([1, 2, 3], $instance);
-    }
-
-    public function testInvokeableClassWithParametersAsociativeArray(): void
+    public function testInvokeableWithParametersAsociativeArray(): void
     {
         $container = $this->createContainer(
             [
@@ -1029,7 +1038,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(42, $instance);
     }
 
-    public function testInvokeableClassWithParametersListArray(): void
+    public function testInvokeableWithParametersListArray(): void
     {
         $container = $this->createContainer(
             [
