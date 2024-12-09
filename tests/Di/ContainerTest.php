@@ -926,10 +926,20 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $container->get(Stub\ClassInvokeableWithIntersectionType::class);
     }
 
-    public function testInvokeableClassWithOptionalArgument(): void
+    public function testInvokeableClassWithOptionalArguments(): void
+    {
+        $container = $this->createContainer();
+
+        $instance = $container->get(Stub\ClassInvokeableOptionalArgument::class);
+
+        $this->assertNull($instance);
+    }
+
+    public function testInvokeableClassWithOptionalArgumentsUsingDefinitions(): void
     {
         $container = $this->createContainer(
             [
+                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
                 'instance' => [
                     '__class' => Stub\ClassInvokeableOptionalArgument::class,
                 ],
@@ -938,16 +948,32 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $instance = $container->get('instance');
 
-        $this->assertNull($instance);
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
     }
 
-    public function testInvokeableClassWithOptionalArgumentUsingDefinitions(): void
+    public function testInvokeableClassWithOptionalArgumentsUsingParametersAsociativeArray(): void
     {
         $container = $this->createContainer(
             [
-                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
                 'instance' => [
                     '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                    '__invoke()' => ['engine' => new Stub\EngineMarkOne()],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
+    }
+
+    public function testInvokeableClassWithOptionalArgumentsUsingParametersListArray(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                    '__invoke()' => [new Stub\EngineMarkOne()],
                 ],
             ],
         );
@@ -985,38 +1011,6 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $instance = $container->get('instance');
 
         $this->assertSame([1, 2, 3], $instance);
-    }
-
-    public function testInvokeableClassWithOptionalArgumentsUsingParametersAsociativeArray(): void
-    {
-        $container = $this->createContainer(
-            [
-                'instance' => [
-                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
-                    '__invoke()' => ['engine' => new Stub\EngineMarkOne()],
-                ],
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
-    }
-
-    public function testInvokeableClassWithOptionalArgumentsUsingParametersListArray(): void
-    {
-        $container = $this->createContainer(
-            [
-                'instance' => [
-                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
-                    '__invoke()' => [new Stub\EngineMarkOne()],
-                ],
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
     }
 
     public function testInvokeableClassWithParametersAsociativeArray(): void
