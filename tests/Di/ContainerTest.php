@@ -141,11 +141,27 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $container->get(Stub\ClassWithStrictConstructor::class);
     }
 
-    public function testInstantiationFailsWithInvalidConstructorArgumentFormat(): void
+    public function testInstantiationFailsWithConstructorInvalidArguments(): void
     {
         $container = $this->createContainer(
             [
-                Stub\ClassWithConstructorOptional::class => ['__construct()' => ['car' => null, 1]],
+                Stub\ClassWithConstructorNullableArgument::class => ['__construct()' => [new \stdClass()]],
+            ],
+        );
+
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage(
+            'PHPPress\Tests\Di\Stub\ClassWithConstructorNullableArgument::__construct(): Argument #1 ($car) must be of type ?PHPPress\Tests\Di\Stub\EngineCar, stdClass given',
+        );
+
+        $container->get(Stub\ClassWithConstructorNullableArgument::class);
+    }
+
+    public function testInstantiationFailsWithConstructorInvalidArgumentsFormat(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\ClassWithConstructorNullableArgument::class => ['__construct()' => ['car' => null, 1]],
             ],
         );
 
@@ -154,7 +170,35 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             'Invalid configuration: "Dependencies indexed by name and by position in the same array are not allowed."',
         );
 
-        $container->get(Stub\ClassWithConstructorOptional::class);
+        $container->get(Stub\ClassWithConstructorNullableArgument::class);
+    }
+
+    public function testInstantiationFailsWithConstructorMissingArguments(): void
+    {
+        $container = $this->createContainer();
+
+        $this->expectException(ArgumentCountError::class);
+        $this->expectExceptionMessage(
+            'Too few arguments to function PHPPress\Tests\Di\Stub\ClassWithStrictConstructor::__construct(), 0 passed and exactly 1 expected',
+        );
+
+        $container->get(Stub\ClassWithStrictConstructor::class);
+    }
+
+    public function testInstantiationFailsWithConstructorMissingArgumentsRequired(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\ClassWithConstructorNullableArgument::class => ['__construct()' => []],
+            ],
+        );
+
+        $this->expectException(NotInstantiable::class);
+        $this->expectExceptionMessage(
+            'Missing required parameter "car" when instantiating "PHPPress\Tests\Di\Stub\ClassWithConstructorNullableArgument"."',
+        );
+
+        $container->get(Stub\ClassWithConstructorNullableArgument::class);
     }
 
     public function testInstantiationFailsWithInvalidDefinitionArrayValue(): void
@@ -191,50 +235,6 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testInstantiationFailsWithInvalidOptionalConstructorArguments(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\ClassWithConstructorOptional::class => ['__construct()' => [new \stdClass()]],
-            ],
-        );
-
-        $this->expectException(TypeError::class);
-        $this->expectExceptionMessage(
-            'PHPPress\Tests\Di\Stub\ClassWithConstructorOptional::__construct(): Argument #1 ($car) must be of type ?PHPPress\Tests\Di\Stub\EngineCar, stdClass given',
-        );
-
-        $container->get(Stub\ClassWithConstructorOptional::class);
-    }
-
-    public function testInstantiationFailsWithMissingConstructorArguments(): void
-    {
-        $container = $this->createContainer();
-
-        $this->expectException(ArgumentCountError::class);
-        $this->expectExceptionMessage(
-            'Too few arguments to function PHPPress\Tests\Di\Stub\ClassWithStrictConstructor::__construct(), 0 passed and exactly 1 expected',
-        );
-
-        $container->get(Stub\ClassWithStrictConstructor::class);
-    }
-
-    public function testInstantiationFailsWithMissingRequiredOptionalArguments(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\ClassWithConstructorOptional::class => ['__construct()' => []],
-            ],
-        );
-
-        $this->expectException(NotInstantiable::class);
-        $this->expectExceptionMessage(
-            'Missing required parameter "car" when instantiating "PHPPress\Tests\Di\Stub\ClassWithConstructorOptional"."',
-        );
-
-        $container->get(Stub\ClassWithConstructorOptional::class);
-    }
-
     public function testInstantiationFailsWithUnboundDependencies(): void
     {
         $container = $this->createContainer();
@@ -258,18 +258,23 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($instance->getCar());
     }
 
-    public function testInstantiationSucceedsWithComplexTypeConstructor(): void
+    public function testInstantiationSucceedsWithConstructorArguments(): void
     {
-        $container = $this->createContainer();
+        $container = $this->createContainer(
+            [
+                Stub\ClassWithConstructorNullableArgument::class => [
+                    '__construct()' => [new Stub\EngineCar(new Stub\EngineMarkOne())],
+                ],
+            ],
+        );
 
-        $instance = $container->get(Stub\ClassWithConstructorDateTime::class);
+        $instance = $container->get(Stub\ClassWithConstructorNullableArgument::class);
 
-        $this->assertInstanceOf(Stub\ClassWithConstructorDateTime::class, $instance);
-        $this->assertInstanceOf(\DateTime::class, $instance->getDateTime());
-        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2}/', $instance->getFormattedDate());
+        $this->assertInstanceOf(Stub\ClassWithConstructorNullableArgument::class, $instance);
+        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getCar());
     }
 
-    public function testInstantiationSucceedsWithDefaultConstructorArguments(): void
+    public function testInstantiationSucceedsWithConstructorArgumentsUsingDefaultValue(): void
     {
         $container = $this->createContainer();
 
@@ -279,58 +284,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('default', $instance->getValue());
     }
 
-    public function testInstantiationSucceedsWithDependencyInjection(): void
-    {
-        $container = $this->createContainer();
-
-        $instance = $container->get(Stub\ClassWithConstructor::class);
-
-        $this->assertInstanceOf(Stub\ClassWithConstructor::class, $instance);
-        $this->assertInstanceOf(Stub\ClassInstance::class, $instance->getDefinitionClass());
-    }
-
-    public function testInstantiationSucceedsWithInterfaceInConstructor(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\ClassWithConstructorInterface::class => [
-                    '__construct()' => [new Stub\EngineMarkOne()],
-                ],
-            ],
-        );
-
-        $instance = $container->get(Stub\ClassWithConstructorInterface::class);
-
-        $this->assertInstanceOf(Stub\ClassWithConstructorInterface::class, $instance);
-        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance->getInterface());
-
-        $actions = $instance->performActions();
-
-        $this->assertSame('Mark One', $actions['name']);
-    }
-
-    public function testInstantiationSucceedsWithMultipleDependencies(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
-                Stub\ClassInterface::class => Stub\ClassInstance::class,
-            ],
-        );
-
-        $instance = $container->get(Stub\ClassWithConstructorMultipleDependencies::class);
-
-        $this->assertInstanceOf(Stub\ClassWithConstructorMultipleDependencies::class, $instance);
-        $this->assertInstanceOf(Stub\EngineInterface::class, $instance->getFirstDependency());
-        $this->assertInstanceOf(Stub\ClassInterface::class, $instance->getSecondDependency());
-
-        $actions = $instance->performActions();
-
-        $this->assertSame('Mark One', $actions['first']);
-        $this->assertSame(0, $actions['second']);
-    }
-
-    public function testInstantiationSucceedsWithOptionalArgumentUsingDefinitionInterface(): void
+    public function testInstantiationSucceedsWithConstructorArgumentsUsingDefinitionInterface(): void
     {
         $container = $this->createContainer(
             [
@@ -338,44 +292,15 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
             ],
         );
 
-        $this->assertTrue($container->has(Stub\ClassWithConstructorOptional::class));
+        $this->assertTrue($container->has(Stub\ClassWithConstructorNullableArgument::class));
 
-        $instance = $container->get(Stub\ClassWithConstructorOptional::class);
+        $instance = $container->get(Stub\ClassWithConstructorNullableArgument::class);
 
-        $this->assertInstanceOf(Stub\ClassWithConstructorOptional::class, $instance);
+        $this->assertInstanceOf(Stub\ClassWithConstructorNullableArgument::class, $instance);
         $this->assertInstanceOf(Stub\EngineCar::class, $instance->getCar());
     }
 
-    public function testInstantiationSucceedsWithOptionalConstructorArguments(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\ClassWithConstructorOptional::class => [
-                    '__construct()' => [new Stub\EngineCar(new Stub\EngineMarkOne())],
-                ],
-            ],
-        );
-
-        $instance = $container->get(Stub\ClassWithConstructorOptional::class);
-
-        $this->assertInstanceOf(Stub\ClassWithConstructorOptional::class, $instance);
-        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getCar());
-    }
-
-    public function testInstantiationSucceedsWithOverriddenDefaultArgument(): void
-    {
-        $container = $this->createContainer(
-            [
-                Stub\ClassWithConstructorDefaultValue::class => ['__construct()' => ['value' => 'custom']],
-            ],
-        );
-
-        $instance = $container->get(Stub\ClassWithConstructorDefaultValue::class);
-
-        $this->assertSame('custom', $instance->getValue());
-    }
-
-    public function testInstantiationSucceedsWithUnionTypeConstructorArguments(): void
+    public function testInstantiationSucceedsWithConstructorArgumentsUsingUnionType(): void
     {
         $container = $this->createContainer(
             [
@@ -431,6 +356,81 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(Stub\ClassWithConstructorUnionType::class, $instance);
         $this->assertNull($instance->getValue());
+    }
+
+    public function testInstantiationSucceedsWithConstructorArgumentsUsingOverriddenDefaultValue(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\ClassWithConstructorDefaultValue::class => ['__construct()' => ['value' => 'custom']],
+            ],
+        );
+
+        $instance = $container->get(Stub\ClassWithConstructorDefaultValue::class);
+
+        $this->assertSame('custom', $instance->getValue());
+    }
+
+    public function testInstantiationSucceedsWithComplexTypeConstructor(): void
+    {
+        $container = $this->createContainer();
+
+        $instance = $container->get(Stub\ClassWithConstructorDateTime::class);
+
+        $this->assertInstanceOf(Stub\ClassWithConstructorDateTime::class, $instance);
+        $this->assertInstanceOf(\DateTime::class, $instance->getDateTime());
+        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2}/', $instance->getFormattedDate());
+    }
+
+    public function testInstantiationSucceedsWithDependencyInjection(): void
+    {
+        $container = $this->createContainer();
+
+        $instance = $container->get(Stub\ClassWithConstructor::class);
+
+        $this->assertInstanceOf(Stub\ClassWithConstructor::class, $instance);
+        $this->assertInstanceOf(Stub\ClassInstance::class, $instance->getDefinitionClass());
+    }
+
+    public function testInstantiationSucceedsWithInterfaceInConstructor(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\ClassWithConstructorInterface::class => [
+                    '__construct()' => [new Stub\EngineMarkOne()],
+                ],
+            ],
+        );
+
+        $instance = $container->get(Stub\ClassWithConstructorInterface::class);
+
+        $this->assertInstanceOf(Stub\ClassWithConstructorInterface::class, $instance);
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance->getInterface());
+
+        $actions = $instance->performActions();
+
+        $this->assertSame('Mark One', $actions['name']);
+    }
+
+    public function testInstantiationSucceedsWithMultipleDependencies(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
+                Stub\ClassInterface::class => Stub\ClassInstance::class,
+            ],
+        );
+
+        $instance = $container->get(Stub\ClassWithConstructorMultipleDependencies::class);
+
+        $this->assertInstanceOf(Stub\ClassWithConstructorMultipleDependencies::class, $instance);
+        $this->assertInstanceOf(Stub\EngineInterface::class, $instance->getFirstDependency());
+        $this->assertInstanceOf(Stub\ClassInterface::class, $instance->getSecondDependency());
+
+        $actions = $instance->performActions();
+
+        $this->assertSame('Mark One', $actions['first']);
+        $this->assertSame(0, $actions['second']);
     }
 
     public function testInstantiationSucceedsWithVariadicConstructorArguments(): void
@@ -523,7 +523,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(42, $container->get('instance'));
     }
 
-    public function testInstatiationUsingCallableWithInterfaceClass(): void
+    public function testInstantiationUsingCallableWithInterfaceClass(): void
     {
         $container = $this->createContainer(
             [
@@ -732,31 +732,31 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('Mark Two', $instance->getEngineCar()->getEngineName());
     }
 
-    public function testInstantiationWithAssociativeOptionalConstructorArguments(): void
+    public function testInstantiationWithConstructorArguments(): void
     {
         $container = $this->createContainer(
             [
-                Stub\ClassWithConstructorOptional::class => ['__construct()' => ['car' => null]],
+                Stub\ClassWithConstructorNullableArgument::class => ['__construct()' => [null]],
             ],
         );
 
-        $intance = $container->get(Stub\ClassWithConstructorOptional::class);
+        $intance = $container->get(Stub\ClassWithConstructorNullableArgument::class);
 
-        $this->assertInstanceOf(Stub\ClassWithConstructorOptional::class, $intance);
+        $this->assertInstanceOf(Stub\ClassWithConstructorNullableArgument::class, $intance);
         $this->assertNull($intance->getCar());
     }
 
-    public function testInstantiationWithConstructorOptionalArguments(): void
+    public function testInstantiationWithConstuctorAssociativeArguments(): void
     {
         $container = $this->createContainer(
             [
-                Stub\ClassWithConstructorOptional::class => ['__construct()' => [null]],
+                Stub\ClassWithConstructorNullableArgument::class => ['__construct()' => ['car' => null]],
             ],
         );
 
-        $intance = $container->get(Stub\ClassWithConstructorOptional::class);
+        $intance = $container->get(Stub\ClassWithConstructorNullableArgument::class);
 
-        $this->assertInstanceOf(Stub\ClassWithConstructorOptional::class, $intance);
+        $this->assertInstanceOf(Stub\ClassWithConstructorNullableArgument::class, $intance);
         $this->assertNull($intance->getCar());
     }
 
@@ -849,6 +849,22 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($instanceOne, $instanceTwo);
     }
 
+    public function testInstantiationWithReflectionCache(): void
+    {
+        $container = $this->createContainer();
+
+        $instance = $container->get(Stub\ClassWithConstructor::class);
+
+        $this->assertInstanceOf(Stub\ClassWithConstructor::class, $instance);
+        $this->assertInstanceOf(Stub\ClassInstance::class, $instance->getDefinitionClass());
+
+        $container->set(Stub\ClassInterface::class, Stub\ClassInstance::class);
+
+        $instance = $container->get(Stub\ClassInterface::class);
+
+        $this->assertInstanceOf(Stub\ClassInstance::class, $instance);
+    }
+
     public function testInvokeableClass(): void
     {
         $container = $this->createContainer(
@@ -910,7 +926,38 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $container->get(Stub\ClassInvokeableWithIntersectionType::class);
     }
 
-    public function testInvokeableClassWithUnionType(): void
+    public function testInvokeableClassWithOptionalArgument(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertNull($instance);
+    }
+
+    public function testInvokeableClassWithOptionalArgumentUsingDefinitions(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\EngineInterface::class => Stub\EngineMarkOne::class,
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
+    }
+
+    public function testInvokeableClassUsingUnionType(): void
     {
         $container = $this->createContainer(
             [
@@ -924,7 +971,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('Mark One', $instance);
     }
 
-    public function testInvokeableClassWithVaradic(): void
+    public function testInvokeableClassUsingVaradic(): void
     {
         $container = $this->createContainer(
             [
@@ -940,6 +987,70 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([1, 2, 3], $instance);
     }
 
+    public function testInvokeableClassWithOptionalArgumentsUsingParametersAsociativeArray(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                    '__invoke()' => ['engine' => new Stub\EngineMarkOne()],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
+    }
+
+    public function testInvokeableClassWithOptionalArgumentsUsingParametersListArray(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableOptionalArgument::class,
+                    '__invoke()' => [new Stub\EngineMarkOne()],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance);
+    }
+
+    public function testInvokeableClassWithParametersAsociativeArray(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableWithoutType::class,
+                    '__invoke()' => ['value' => 42],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertSame(42, $instance);
+    }
+
+    public function testInvokeableClassWithParametersListArray(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\ClassInvokeableWithoutType::class,
+                    '__invoke()' => [42],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertSame(42, $instance);
+    }
+
     public function testMultipleGetCallsCreateDifferentInstances(): void
     {
         $container = $this->createContainer();
@@ -948,22 +1059,6 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $instanceTwo = $container->get(Stub\ClassInstance::class);
 
         $this->assertNotSame($instanceOne, $instanceTwo);
-    }
-
-    public function testInstantiationWithReflectionCache(): void
-    {
-        $container = $this->createContainer();
-
-        $instance = $container->get(Stub\ClassWithConstructor::class);
-
-        $this->assertInstanceOf(Stub\ClassWithConstructor::class, $instance);
-        $this->assertInstanceOf(Stub\ClassInstance::class, $instance->getDefinitionClass());
-
-        $container->set(Stub\ClassInterface::class, Stub\ClassInstance::class);
-
-        $instance = $container->get(Stub\ClassInterface::class);
-
-        $this->assertInstanceOf(Stub\ClassInstance::class, $instance);
     }
 
     public function testRetrieveContainerDefinitions(): void
@@ -994,7 +1089,7 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ClassInstance::class, $container->get('instance'));
     }
 
-    public function testSetsingleton(): void
+    public function testSetSingleton(): void
     {
         $container = $this->createContainer();
 

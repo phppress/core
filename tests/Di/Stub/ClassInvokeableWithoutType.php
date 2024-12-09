@@ -12,7 +12,7 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ClassInvokeableWithoutType
 {
-    public function __invoke($value = 0): mixed
+    public function __invoke($value): mixed
     {
         return $value;
     }

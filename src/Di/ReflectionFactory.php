@@ -138,7 +138,7 @@ class ReflectionFactory
         $mergeDependencies = $this->mergeDependencies($dependencies, $addDependencies);
         $resolveDependencies = $this->resolveDependencies($mergeDependencies, $reflection);
 
-        if ($reflection->isInstantiable() === false) {
+        if ($this->canBeAutowired($class) === false) {
             throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
@@ -472,15 +472,21 @@ class ReflectionFactory
                 return $value;
             }
 
-            if ($reflectionParameter->isDefaultValueAvailable()) {
-                return $reflectionParameter->getDefaultValue();
-            }
+            if (array_key_exists($key, $params)) {
+                $value = $params[$key];
 
-            unset($params[$key]);
+                unset($params[$key]);
+
+                return $value;
+            }
 
             try {
                 return $this->container->get($className);
             } catch (NotInstantiable $e) {
+                if ($reflectionParameter->isDefaultValueAvailable()) {
+                    return $reflectionParameter->getDefaultValue();
+                }
+
                 continue;
             }
         }
