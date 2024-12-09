@@ -359,7 +359,7 @@ class ReflectionFactory
      *
      * @param ReflectionParameter $reflectionParameter Parameter being resolved.
      * @param string $name Name of the parameter.
-     * @param array &$params Available parameters, passed by reference.
+     * @param array $params Available parameters, passed by reference.
      *
      * @throws InvalidConfig If required parameter cannot be resolved.
      *
@@ -448,7 +448,7 @@ class ReflectionFactory
      * @param array $classNames Potential class names for the parameter.
      * @param string $name Parameter name.
      * @param string|int $key Parameter key in the parameters array.
-     * @param array &$params Available parameters, passed by reference.
+     * @param array $params Available parameters, passed by reference.
      *
      * @throws InvalidConfig If dependency cannot be resolved.
      *
