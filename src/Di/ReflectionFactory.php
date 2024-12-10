@@ -193,7 +193,7 @@ class ReflectionFactory
 
         $args = [];
 
-        foreach ($reflection->getParameters() as $key => $reflectionParameter) {
+        foreach ($reflection->getParameters() as $reflectionParameter) {
             $type = $reflectionParameter->getType();
             $name = $reflectionParameter->getName();
 
@@ -208,7 +208,7 @@ class ReflectionFactory
 
                 $args = [...$args, ...$varadicArgs];
             } else {
-                $args[] = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
+                $args[] = $this->resolveDependency($reflectionParameter, $classNames, $name, $params);
             }
         }
 
@@ -243,22 +243,7 @@ class ReflectionFactory
             $classes[] = $reflectionType->getName();
         }
 
-        // Handle union types
-        if ($reflectionType instanceof ReflectionUnionType) {
-            /** @var ReflectionNamedType[] $types */
-            $types = $reflectionType->getTypes();
-
-            foreach ($types as $type) {
-                // Prioritize finding a non-built-in type (like an interface or class)
-
-                if (!$type->isBuiltin()) {
-                    $classes[] = $type->getName();
-                }
-            }
-        }
-
-        // Handle intersection types if needed
-        if ($reflectionType instanceof ReflectionIntersectionType) {
+        if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
             /** @var ReflectionNamedType[] $types */
             $types = $reflectionType->getTypes();
 
@@ -447,7 +432,6 @@ class ReflectionFactory
      * @param ReflectionParameter $reflectionParameter Parameter being resolved.
      * @param array $classNames Potential class names for the parameter.
      * @param string $name Parameter name.
-     * @param string|int $key Parameter key in the parameters array.
      * @param array $params Available parameters, passed by reference.
      *
      * @throws InvalidConfig If dependency cannot be resolved.
@@ -460,7 +444,6 @@ class ReflectionFactory
         ReflectionParameter $reflectionParameter,
         array $classNames,
         string $name,
-        string|int $key,
         array &$params,
     ): mixed {
         foreach ($classNames as $className) {
@@ -472,12 +455,8 @@ class ReflectionFactory
                 return $value;
             }
 
-            if (array_key_exists($key, $params)) {
-                $value = $params[$key];
-
-                unset($params[$key]);
-
-                return $value;
+            if (count($params)) {
+                return array_shift($params);
             }
 
             try {
