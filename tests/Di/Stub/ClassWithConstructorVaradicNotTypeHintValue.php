@@ -10,11 +10,11 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class ConstructorVaradicMixed
+final class ClassWithConstructorVaradicNotTypeHintValue
 {
     private array $value = [];
 
-    public function __construct(mixed ...$value)
+    public function __construct(...$value)
     {
         $this->value = $value;
     }

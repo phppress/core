@@ -10,7 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Foo
+interface ClassInterface
 {
-    public function __construct(public Bar $bar) {}
+    public function getA(): int;
+    public function getB(): int;
+    public function setA(int $a): void;
+    public function setB(int $b): void;
 }

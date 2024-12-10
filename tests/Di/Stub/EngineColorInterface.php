@@ -10,7 +10,8 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class UnionTypeNull
+interface EngineColorInterface
 {
-    public function __construct(protected string|int|float|bool|null $value) {}
+    public function getColor(): string;
+    public function setColor(string $value): void;
 }

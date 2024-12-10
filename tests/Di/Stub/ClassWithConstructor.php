@@ -10,10 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class CallableClass
+final class ClassWithConstructor
 {
-    public function __invoke()
+    public function __construct(private readonly ClassInstance $definitionClass) {}
+
+    public function getDefinitionClass(): ClassInstance
     {
-        return true;
+        return $this->definitionClass;
     }
 }

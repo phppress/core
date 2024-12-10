@@ -10,4 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Color extends AbstractColor {}
+final class ClassInvokeableOptionalArgument
+{
+    public function __invoke(EngineInterface|null $engine = null): EngineInterface|null
+    {
+        return $engine ? new EngineCar($engine)->getEngine() : null;
+    }
+}
