@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Di;
 
 use PHPPress\Di\{Container, ReflectionFactory};
-use PHPPress\Exception\InvalidDefinition;
 use PHPUnit\Framework\Attributes\Group;
-use Psr\Container\ContainerInterface;
 
 /**
  * Test case for the ReflectionFactory class.
@@ -34,37 +32,13 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         parent::tearDown();
     }
 
-    public function testResolveCallableDependenciesWithCallbackAsArray(): void
+    public function testInvokeDefinitionUsingAdditionalParameters(): void
     {
-        $callback = [new Stub\InvokeablePSRContainer(), '__invoke'];
-
-        $dependencies = $this->factory->resolveCallableDependencies(
-            $callback,
-            [],
-        );
-
-        $this->assertCount(1, $dependencies);
-        $this->assertInstanceOf(ContainerInterface::class, $dependencies[0]);
-    }
-
-    public function testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter(): void
-    {
-        $this->expectException(InvalidDefinition::class);
-        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():55}"."');
-
-        $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
-    }
-
-    public function testResolveCallableDependenciesHandlesAdditionalParams(): void
-    {
-        $result = $this->factory->resolveCallableDependencies(
+        $invoke = $this->factory->invoke(
             static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
             ['First', ['Second', 'Third']],
         );
 
-        $this->assertCount(3, $result);
-        $this->assertSame('First', $result[0]);
-        $this->assertSame('Second', $result[1]);
-        $this->assertSame('Third', $result[2]);
+        $this->assertSame(['First', ['Second', 'Third']], $invoke);
     }
 }

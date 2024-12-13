@@ -147,49 +147,6 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\Instance::class, $instance);
     }
 
-    public function testWiringByClosure(): void
-    {
-        $container = $this->createContainer(
-            [
-                'instance' => static function (): Stub\EngineCarTunning {
-                    $engineMarkOne = new Stub\EngineMarkOne();
-                    $engineCar = new Stub\EngineCar($engineMarkOne);
-
-                    return new Stub\EngineCarTunning($engineCar);
-                },
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertInstanceOf(Stub\EngineCarTunning::class, $instance);
-        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getEngineCar());
-        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance->getEngineCar()->getEngine());
-        $this->assertSame('Mark One', $instance->getEngineCar()->getEngineName());
-    }
-
-    public function testWiringByClosureWithContainer(): void
-    {
-        $container = $this->createContainer(
-            [
-                'instance' => static function (Container $c): Stub\EngineCarTunning {
-                    $engineInterface = $c->get(Stub\EngineInterface::class);
-                    $engineCar = new Stub\EngineCar($engineInterface);
-
-                    return new Stub\EngineCarTunning($engineCar);
-                },
-                Stub\EngineInterface::class => Stub\EngineMarkTwo::class,
-            ],
-        );
-
-        $instance = $container->get('instance');
-
-        $this->assertInstanceOf(Stub\EngineCarTunning::class, $instance);
-        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getEngineCar());
-        $this->assertInstanceOf(Stub\EngineMarkTwo::class, $instance->getEngineCar()->getEngine());
-        $this->assertSame('Mark Two', $instance->getEngineCar()->getEngineName());
-    }
-
     private function createContainer($definitions = [], $singletons = []): Container
     {
         return new Container($definitions, $singletons);

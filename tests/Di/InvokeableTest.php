@@ -161,6 +161,76 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['class' => 'InvokeableDefaultValue', 'engine' => 'Mark One'], $instance);
     }
 
+    public function testDefinitionUsingArrayCallable(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [Stub\InstanceFactory::class, 'create'],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\Instance::class, $instance);
+        $this->assertSame(42, $instance->getA());
+    }
+
+    public function testDefinitionUsingArrayObjectCallable(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [new Stub\InvokeablePSRContainer(), '__invoke'],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(ContainerInterface::class, $instance);
+    }
+
+    public function testDefinitionUsingClosure(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => static function (): Stub\EngineCarTunning {
+                    $engineMarkOne = new Stub\EngineMarkOne();
+                    $engineCar = new Stub\EngineCar($engineMarkOne);
+
+                    return new Stub\EngineCarTunning($engineCar);
+                },
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineCarTunning::class, $instance);
+        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getEngineCar());
+        $this->assertInstanceOf(Stub\EngineMarkOne::class, $instance->getEngineCar()->getEngine());
+        $this->assertSame('Mark One', $instance->getEngineCar()->getEngineName());
+    }
+
+    public function testDefinitionUsingClosureWithPSRContainerInterfaceClass(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => static function (ContainerInterface $c): Stub\EngineCarTunning {
+                    $engineInterface = $c->get(Stub\EngineInterface::class);
+                    $engineCar = new Stub\EngineCar($engineInterface);
+
+                    return new Stub\EngineCarTunning($engineCar);
+                },
+                Stub\EngineInterface::class => Stub\EngineMarkTwo::class,
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\EngineCarTunning::class, $instance);
+        $this->assertInstanceOf(Stub\EngineCar::class, $instance->getEngineCar());
+        $this->assertInstanceOf(Stub\EngineMarkTwo::class, $instance->getEngineCar()->getEngine());
+        $this->assertSame('Mark Two', $instance->getEngineCar()->getEngineName());
+    }
+
     public function testDefinitionUsingIndexedParameters(): void
     {
         $container = $this->createContainer(
@@ -439,6 +509,20 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(42, $instance);
     }
 
+    public function testFailsForDefinitionUsingClosureWithMissingRequiredParameter(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => static fn(string $requiredParam): string => $requiredParam,
+            ],
+        );
+
+        $this->expectException(InvalidDefinition::class);
+        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():516}"."');
+
+        $container->get('instance');
+    }
+
     public function testFailsForInvalidArguments(): void
     {
         $container = $this->createContainer(
@@ -563,7 +647,7 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('blue', $instance);
     }
 
-    public function testMultipleDependenciesUsing(): void
+    public function testMultipleDependencies1(): void
     {
         $container = $this->createContainer(
             [
