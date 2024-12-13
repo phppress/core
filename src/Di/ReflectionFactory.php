@@ -378,22 +378,15 @@ class ReflectionFactory
      * @param array $invokeDefinitions Invoke method configurations.
      *
      * @return mixed The result of invoking the object or the object itself.
-     *
-     * @throws InvalidDefinition If the object is not invokable.
-     * @throws NotInstantiable If the object cannot be instantiated.
      */
     private function handleInvokableObject(object $object, array $invokeDefinitions = []): mixed
     {
-        try {
-            $reflection = new ReflectionMethod($object, '__invoke');
+        $reflection = new ReflectionMethod($object, '__invoke');
 
-            $resolvedParams = $this->resolveMethodParameters($reflection, $invokeDefinitions);
-            $result = $reflection->invokeArgs($object, $resolvedParams);
+        $resolvedParams = $this->resolveMethodParameters($reflection, $invokeDefinitions);
+        $result = $reflection->invokeArgs($object, $resolvedParams);
 
-            return $result;
-        } catch (ReflectionException $e) {
-            return $object;
-        }
+        return $result;
     }
 
     /**
