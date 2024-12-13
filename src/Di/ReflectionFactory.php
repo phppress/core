@@ -551,10 +551,6 @@ class ReflectionFactory
      */
     private function resolveMethodParameters(ReflectionMethod|ReflectionFunction $method, array $params = []): array
     {
-        if ($this->shouldSkipReflectionForMagicMethod($method->getName())) {
-            return [];
-        }
-
         $args = [];
 
         $isAsociativeParams = Arr::isAssociative($params);
