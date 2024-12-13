@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Stub class for testing.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class InvokeablePSRContainer
 {
-    public function __invoke(EngineInterface $engine): string
+    public function __invoke(ContainerInterface $container): ContainerInterface
     {
-        return $engine->getName();
+        return $container;
     }
 }

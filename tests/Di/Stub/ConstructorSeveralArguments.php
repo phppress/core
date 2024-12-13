@@ -10,10 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class ConstructorSeveralArguments
 {
-    public function __invoke(EngineInterface $engine): string
+    public $callable;
+
+    public function __construct(public array $array, callable $callable, public object $object, public string $string)
     {
-        return $engine->getName();
+        $this->callable = $callable;
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Di;
 
 use PHPPress\Di\Exception\Message;
-use PHPPress\Exception\InvalidConfig;
+use PHPPress\Exception\InvalidArgument;
 
 /**
  * Instance represents a reference to a named object in a dependency injection (DI) container or a service locator.
@@ -34,12 +34,12 @@ use PHPPress\Exception\InvalidConfig;
 readonly class Instance
 {
     /**
-     * @throws InvalidConfig if `$id` is an empty string.
+     * @throws InvalidArgument if `$id` is an empty string.
      */
     final public function __construct(public readonly string $id)
     {
         if ($id === '') {
-            throw new InvalidConfig(Message::COMPONENT_ID_EMPTY->getMessage());
+            throw new InvalidArgument(Message::COMPONENT_ID_EMPTY->getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ readonly class Instance
      *
      * @param string $id The component ID.
      *
-     * @throws InvalidConfig if `$id` is an empty string.
+     * @throws InvalidArgument if `$id` is an empty string.
      *
      * @return static the new Instance object.
      */

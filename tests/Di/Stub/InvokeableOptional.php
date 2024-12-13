@@ -10,10 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class InvokeableOptional
 {
-    public function __invoke(EngineInterface $engine): string
+    public function __invoke(EngineInterface|null $engine = null): EngineInterface|null
     {
-        return $engine->getName();
+        return $engine ? new EngineCar($engine)->getEngine() : null;
     }
 }

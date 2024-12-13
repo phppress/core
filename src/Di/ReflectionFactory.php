@@ -7,7 +7,7 @@ namespace PHPPress\Di;
 use Closure;
 use Exception;
 use PHPPress\Di\Exception\{Message, NotInstantiable};
-use PHPPress\Exception\InvalidConfig;
+use PHPPress\Exception\InvalidDefinition;
 use PHPPress\Helper\Arr;
 use ReflectionClass;
 use ReflectionException;
@@ -21,15 +21,25 @@ use ReflectionUnionType;
 use Throwable;
 
 use function array_key_exists;
-use function array_replace;
-use function array_shift;
-use function array_values;
-use function count;
 use function is_array;
 use function is_object;
 
 /**
- * Provides methods for creating and resolving dependencies using reflection.
+ * Reflection Factory for dependency creation and resolution.
+ *
+ * This class uses PHP reflection to analyze, create, and automatically inject dependencies into objects. It provides
+ * advanced dependency injection capabilities, enabling class instance creation with automatic dependency resolution.
+ *
+ * Key Features:
+ * - Automatic dependency resolution.
+ * - Support for complex parameter types (union, intersection).
+ * - Reflection and dependency caching.
+ * - Dependency configuration validation.
+ *
+ * Provides a robust mechanism for:
+ * - Instantiating classes with automatic constructor dependency injection.
+ * - Resolving dependencies for callable methods and functions.
+ * - Handling various type hinting scenarios.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -44,79 +54,130 @@ class ReflectionFactory
      * @var array Cached ReflectionClass objects indexed by class/interface names.
      */
     private array $reflections = [];
-    /**
-     * @var bool Whether to attempt to resolve elements in array dependencies.
-     */
-    private bool $resolveArrays = true;
 
     public function __construct(private readonly Container $container) {}
 
     /**
-     * Checks if a class can be autowired.
+     * Determines if a class can be automatically instantiated.
      *
-     * @param string $id The class name or interface.
+     * Checks whether a given class or interface can be instantiated without manual configuration. Utilizes reflection
+     * to verify the instantiability of the class.
      *
-     * @return bool Whether the class can be autowired.
+     * @param string $id The fully qualified class or interface name.
+     *
+     * @return bool Returns true if the class can be autowired, false otherwise.
+     *
+     * // Check if a class can be automatically instantiated
+     * ```php
+     * $canCreateUser = $reflectionFactory->canBeAutowired(User::class);
+     * ```
      */
     public function canBeAutowired(string $id): bool
     {
         try {
-            $reflection = $this->getReflection($id);
+            if (array_key_exists($id, $this->reflections)) {
+                return $this->reflections[$id]->isInstantiable();
+            }
 
-            return $reflection->isInstantiable();
+            return new ReflectionClass($id)->isInstantiable();
         } catch (ReflectionException) {
             return false;
         }
     }
+
     /**
-     * Creates an instance of the specified class.
+     * Creates an instance of a class with resolved dependencies.
      *
-     * @param string $class The class name.
-     * @param array $definitions The property values (name-value pairs) given in terms of property names or methods.
+     * This method builds an object by performing the following tasks:
+     * 1. Retrieves constructor dependencies for the class.
+     * 2. Merges default dependencies with custom dependencies.
+     * 3. Resolves all dependencies.
+     * 4. Instantiates the object with resolved dependencies.
      *
-     * @throws NotInstantiable If the class is not instantiable.
-     * @throws InvalidConfig If there's an invalid configuration.
+     * @param string $class The fully qualified class name to instantiate-
+     * @param array $definitions Additional property configurations and constructor parameters.
+     *   - Use `__construct()` key for constructor parameters.
+     *   - Other keys represent property setter configurations.
      *
-     * @return object The created instance.
+     * @throws InvalidDefinition If dependency definition is incorrect.
+     * @throws NotInstantiable If the class cannot be instantiated.
+     *
+     * @return object The fully constructed and configured object instance.
+     *
+     * // Basic usage
+     * ```php
+     * $user = $reflectionFactory->create(User::class);
+     * ```
+     *
+     * // With custom constructor parameters
+     * ```php
+     * $user = $reflectionFactory->create(
+     *     User::class,
+     *     [
+     *         '__construct()' => ['John Doe', 30],
+     *         'setRole()' => ['admin'],
+     *     ],
+     * );
+     * ```
      */
     public function create(string $class, array $definitions = []): object
     {
         /** @var ReflectionClass $reflection */
-        [$reflection, $dependencies] = $this->getDependencies($class);
+        [$reflection, $dependencies] = $this->getDependencies($class, $definitions);
 
         $addDependencies = $definitions['__construct()'] ?? [];
 
         unset($definitions['__construct()']);
 
-        $this->validateDependencies($addDependencies);
-
         $mergeDependencies = $this->mergeDependencies($dependencies, $addDependencies);
-        $resolveDependencies = $this->resolveDependencies($mergeDependencies, $reflection);
+        $resolveDependencies = $this->resolveDependencies($mergeDependencies);
 
-        if ($reflection->isInstantiable() === false) {
+        if ($this->canBeAutowired($class) === false) {
             throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
-        $definitions = $this->resolveDependencies($definitions);
         $object = $reflection->newInstanceArgs($resolveDependencies);
 
         return ConfigurableFactory::configure($object, $definitions);
     }
 
     /**
-     * Resolve dependencies for a function.
+     * Resolves dependencies for a callable (function, method, or closure).
      *
-     * This method can be used to implement similar functionality as provided by [[invoke()]] in other components.
+     * Analyzes the callable's signature and automatically resolves its dependencies based on type hints, available
+     * parameters, and the dependency injection container.
      *
-     * @param callable|Closure|string $callback Callable to be invoked.
-     * @param array $params The array of parameters for the function can be either numeric or associative.
+     * Supports:
+     * - Static methods.
+     * - Instance methods.
+     * - Closures.
+     * - Regular functions.
+     * - Variadic parameters.
      *
-     * @throws InvalidConfig If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
-     * @throws Throwable If the callback is not valid, callable.
+     * @param array|callable|Closure|string $callback The callable to resolve dependencies for.
+     * @param array $params Optional explicit parameters to override automatic resolution.
      *
-     * @return array The resolved dependencies.
+     * @throws InvalidDefinition If a dependency cannot be resolved or if dependencies are in an invalid format.
+     * @throws Throwable If the callback is not valid or callable.
+     *
+     * @return array Resolved dependencies ready to be used as function arguments.
+     *
+     * // Resolve dependencies for a function
+     * ```php
+     * $args = $reflectionFactory->resolveCallableDependencies(
+     *     [UserService::class, 'createUser'],
+     *     ['username' => 'john_doe']
+     * );
+     * ```
+     *
+     * // Resolve dependencies for a closure
+     * ```php
+     * $args = $reflectionFactory->resolveCallableDependencies(
+     *     fn(UserRepository $repo) => $repo->findAll()
+     * );
+     * ```
      */
-    public function resolveCallableDependencies(callable|Closure|string $callback, array $params = []): array
+    public function resolveCallableDependencies(array|callable|Closure|string $callback, array $params = []): array
     {
         $reflection = match (true) {
             is_array($callback) => new ReflectionMethod($callback[0], $callback[1]),
@@ -124,115 +185,69 @@ class ReflectionFactory
             default => new ReflectionFunction($callback),
         };
 
-        $args = [];
-
-        foreach ($reflection->getParameters() as $key => $reflectionParameter) {
-            /** @var ReflectionIntersectionType|ReflectionNamedType|ReflectionUnionType $type */
-            $type = $reflectionParameter->getType();
-            $name = $reflectionParameter->getName();
-            $className = $this->getClassName($type);
-
-            if ($reflectionParameter->isVariadic()) {
-                $variadicArgs = [];
-
-                while (count($params)) {
-                    $variadicArgs[] = $this->resolveBuiltInType($reflectionParameter, $name, $params);
-                }
-
-                $args = [...$args, ...$variadicArgs];
-            } else {
-                $args[] = $this->resolveDependency($reflectionParameter, $className, $name, $key, $params);
-            }
-        }
-
-        return $args;
+        return $this->resolveMethodParameters($reflection, $params);
     }
 
     /**
-     * Resolves dependencies by replacing them with the actual object instances.
+     * Extracts class names from a reflection type, handling various type scenarios.
      *
-     * @param array $dependencies The dependencies.
-     * @param ReflectionClass|null $reflection The class reflection associated with the dependencies.
+     * This method supports:
+     * - Simple named types.
+     * - Union types.
+     * - Intersection types.
      *
-     * @throws Exception If a dependency cannot be resolved.
-     * @throws InvalidConfig If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
-     * @throws NotInstantiable If a dependency cannot be resolved, or if a dependency cannot be fulfilled.
-     * Missing required parameter when instantiating a class.
-     * @throws Throwable In case of circular references.
+     * Prioritizes non-built-in types (classes and interfaces).
      *
-     * @return array The resolved dependencies.
-     */
-    public function resolveDependencies(array $dependencies, ReflectionClass|null $reflection = null): array
-    {
-        foreach ($dependencies as $index => $dependency) {
-            if ($dependency instanceof Instance) {
-                try {
-                    $dependencies[$index] = $this->container->get($dependency->id);
-                } catch (Exception | Throwable $e) {
-                    if ($reflection !== null) {
-                        $parameter = $reflection->getConstructor()?->getParameters()[$index] ?? null;
-
-                        if ($parameter?->isOptional()) {
-                            $dependencies[$index] = $parameter->getDefaultValue();
-                            continue;
-                        }
-
-                        $name = $parameter->getName();
-                        $class = $reflection->getName();
-
-                        throw new NotInstantiable(
-                            Message::PARAMETER_MISSING->getMessage($name, $class),
-                        );
-                    }
-
-                    throw $e;
-                }
-            } elseif ($this->resolveArrays && is_array($dependency)) {
-                $dependencies[$index] = $this->resolveDependencies($dependency, $reflection);
-            }
-        }
-
-        return $dependencies;
-    }
-
-    /**
-     * Extracts the class name from a reflection type.
+     * @param ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType The reflection type to
+     * analyze.
      *
-     * @param ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType The reflection type.
-     *
-     * @return string|null The extracted class name, or `null` if no class name is found.
+     * @return array List of extracted class names, empty array if no class names found.
      */
     private function getClassName(
         ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType,
-    ): string|null {
+    ): array {
+        if ($reflectionType === null) {
+            return [];
+        }
+
+        $classes = [];
+
         if ($reflectionType instanceof ReflectionNamedType && $reflectionType->isBuiltin() === false) {
-            return $reflectionType->getName();
+            $classes[] = $reflectionType->getName();
         }
 
         if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
-            /** @phpstan-var ReflectionNamedType[] $types */
+            /** @var ReflectionNamedType[] $types */
             $types = $reflectionType->getTypes();
 
             foreach ($types as $type) {
-                if ($type->isBuiltin() === false) {
-                    return $type->getName();
+                if (!$type->isBuiltin()) {
+                    $classes[] = $type->getName();
                 }
             }
         }
 
-        return null;
+        return $classes;
     }
 
     /**
-     * Returns the dependencies of the specified class.
+     * Retrieves and caches dependencies for a specific class.
      *
-     * @param string $class The class name, interface name or alias name.
+     * Performs the following operations:
+     * 1. Checks for cached dependencies.
+     * 2. Reflects on the class constructor.
+     * 3. Analyzes constructor parameters.
+     * 4. Caches reflection and dependencies for future use.
      *
-     * @throws NotInstantiable if a dependency cannot be resolved, or if a dependency cannot be fulfilled.
+     * @param string $class The fully qualified class name to inspect.
      *
-     * @return array the dependencies of the specified class.
+     * @throws NotInstantiable If the class cannot be reflected or instantiated.
+     *
+     * @return array A tuple containing:
+     * - ReflectionClass instance
+     * - Array of dependencies
      */
-    private function getDependencies(string $class): array
+    private function getDependencies(string $class, array $params = []): array
     {
         if (isset($this->reflections[$class])) {
             return [$this->reflections[$class], $this->dependencies[$class]];
@@ -242,94 +257,84 @@ class ReflectionFactory
 
         try {
             $reflection = new ReflectionClass($class);
+            $this->reflections[$class] = $reflection;
         } catch (ReflectionException $e) {
             throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
-        $constructor = $reflection->getConstructor();
+        $reflectionMethod = match ($reflection->isInternal()) {
+            true => null,
+            default => $reflection->getConstructor(),
+        };
 
-        if ($constructor !== null) {
-            foreach ($constructor->getParameters() as $param) {
-                if ($param->isVariadic() === false) {
-                    $type = $param->getType();
-
-                    if ($type instanceof ReflectionNamedType && $type->isBuiltin() === false) {
-                        $dependencies[$param->getName()] = Instance::of($type->getName());
-                    } elseif ($param->isDefaultValueAvailable()) {
-                        $dependencies[$param->getName()] = $param->getDefaultValue();
-                    }
-                }
-            }
+        if ($reflectionMethod !== null) {
+            $dependencies = $this->resolveMethodParameters($reflectionMethod, $params['__construct()'] ?? []);
         }
 
-        $this->reflections[$class] = $reflection;
         $this->dependencies[$class] = $dependencies;
 
         return [$reflection, $dependencies];
     }
 
     /**
-     * Returns a ReflectionClass object for the specified class.
+     * Merges dependency arrays with intelligent combination strategy.
      *
-     * @param string $class The class name.
+     * Handles two merge scenarios:
+     * - Numeric array: Replaces entire dependencies.
+     * - Associative array: Replaces specific dependencies.
      *
-     * @return ReflectionClass The ReflectionClass object for the specified class.
-     */
-    private function getReflection(string $class): ReflectionClass
-    {
-        return $this->reflections[$class] ?? new ReflectionClass($class);
-    }
-
-    /**
-     * Merges two arrays into one.
+     * @param array $a Original dependencies array.
+     * @param array $b New dependencies to merge.
      *
-     * @param array $a The array to be merged to.
-     * @param array $b The array to be merged from.
-     *
-     * @return array The merged array (the original arrays are not changed.)
+     * @return array Merged dependencies array.
      */
     private function mergeDependencies(array $a, array $b): array
     {
-        if ($b !== [] && is_int(key($b))) {
-            return array_replace(array_values($a), $b);
+        if ($b !== [] && Arr::isList($b)) {
+            return $b;
         }
 
-        $merged = array_replace($a, $b);
-
-        return array_values($merged);
+        return $a;
     }
 
     /**
      * Resolves dependencies for built-in type parameters.
      *
-     * @param ReflectionParameter $reflectionParameter The parameter being resolved.
-     * @param string $name The name of the parameter.
-     * @param array $params Reference to the parameters array.
+     * Resolution strategy:
+     * 1. Use explicitly provided parameter.
+     * 2. Shift first available parameter.
+     * 3. Use default value if available.
+     * 4. Throw exception if no resolution possible.
      *
-     * @throws InvalidConfig If a required parameter cannot be resolved.
+     * @param ReflectionParameter $reflectionParameter Parameter being resolved.
+     * @param string $name Name of the parameter.
+     * @param int|string $key Key of the parameter in the parameters array.
+     * @param array $params Available parameters, passed by reference.
      *
-     * @return mixed The resolved parameter value.
+     * @throws InvalidDefinition If required parameter cannot be resolved.
+     *
+     * @return mixed Resolved parameter value.
      */
-    private function resolveBuiltInType(ReflectionParameter $reflectionParameter, string $name, array &$params): mixed
-    {
-        if (array_key_exists($name, $params)) {
-            $value = $params[$name];
+    private function resolveBuiltInType(
+        ReflectionParameter $reflectionParameter,
+        string $name,
+        int|string $key,
+        array &$params,
+    ): mixed {
+        if (array_key_exists($key, $params)) {
+            $value = $params[$key];
 
-            unset($params[$name]);
+            unset($params[$key]);
 
             return $value;
-        }
-
-        if (count($params)) {
-            return array_shift($params);
         }
 
         if ($reflectionParameter->isDefaultValueAvailable()) {
             return $reflectionParameter->getDefaultValue();
         }
 
-        throw new InvalidConfig(
-            Message::PARAMETER_CALLABLE_MISSING->getMessage(
+        throw new InvalidDefinition(
+            Message::PARAMETER_MISSING->getMessage(
                 $name,
                 $reflectionParameter->getDeclaringFunction()->getName(),
             ),
@@ -337,56 +342,138 @@ class ReflectionFactory
     }
 
     /**
+     * Recursively resolves dependencies by replacing placeholders with actual object instances.
+     *
+     * Handles complex dependency scenarios:
+     * - Resolves Instance placeholders using the container.
+     * - Supports nested dependency resolution.
+     * - Handles optional dependencies.
+     *
+     * @param array $dependencies List of dependencies to resolve.
+     *
+     * @throws Exception If dependency resolution fails.
+     * @throws InvalidDefinition For unresolvable dependencies.
+     * @throws NotInstantiable For instantiation failures.
+     *
+     * @return array Fully resolved dependencies.
+     */
+    private function resolveDependencies(array $dependencies): array
+    {
+        foreach ($dependencies as $index => $dependency) {
+            if ($dependency instanceof Instance) {
+                $dependencies[$index] = $this->container->get($dependency->id);
+            } elseif (is_array($dependency)) {
+                $dependencies[$index] = $this->resolveDependencies($dependency);
+            }
+        }
+
+        return $dependencies;
+    }
+
+    /**
      * Resolves a single dependency for a method or function parameter.
      *
-     * @param ReflectionParameter $reflectionParameter The parameter being resolved.
-     * @param string|null $className The class name of the parameter type.
-     * @param string $name The name of the parameter.
-     * @param string|int $key The key of the parameter in the parameters array.
-     * @param array $params Reference to the parameters array.
+     * Comprehensive resolution strategy:
+     * 1. Check for explicitly provided parameter.
+     * 2. Use default value if available.
+     * 3. Attempt to resolve via dependency container.
+     * 4. Fallback to built-in type resolution.
      *
-     * @throws InvalidConfig If a required dependency cannot be resolved.
+     * @param ReflectionParameter $reflectionParameter Parameter being resolved.
+     * @param array $classNames Potential class names for the parameter.
+     * @param string $name Name of the parameter.
+     * @param int|string $key Key of the parameter in the parameters array.
+     * @param array $params Available parameters, passed by reference.
      *
-     * @return mixed The resolved dependency.
+     * @throws InvalidDefinition If dependency cannot be resolved.
+     *
+     * @return mixed Resolved dependency value.
+     *
+     * @phpstan-param list<class-string> $classNames
      */
     private function resolveDependency(
         ReflectionParameter $reflectionParameter,
-        string|null $className,
+        array $classNames,
         string $name,
-        string|int $key,
+        int|string $key,
         array &$params,
     ): mixed {
-        if ($className === null) {
-            return $this->resolveBuiltInType($reflectionParameter, $name, $params);
+        foreach ($classNames as $className) {
+            if (array_key_exists($key, $params)) {
+                $value = $params[$key];
+
+                unset($params[$key]);
+
+                return $value;
+            }
+
+            if ($this->container->has($className) === false && $reflectionParameter->isDefaultValueAvailable()) {
+                return $reflectionParameter->getDefaultValue();
+            }
+
+            try {
+                return $this->container->get($className);
+            } catch (NotInstantiable) {
+                continue;
+            }
         }
 
-        if (array_key_exists($name, $params)) {
-            $value = $params[$name];
+        return $this->resolveBuiltInType($reflectionParameter, $name, $key, $params);
+    }
 
-            unset($params[$name]);
+    /**
+     * Resolves method parameters using reflection, supporting constructors, invoke methods, and custom methods.
+     *
+     * Performs a comprehensive analysis of method parameters:
+     * 1. Reflects on the method parameters.
+     * 2. Resolves dependencies for each parameter.
+     * 3. Handles variadic and non-variadic arguments.
+     * 4. Resolves instance dependencies.
+     *
+     * @param ReflectionMethod|ReflectionFunction $method The method to analyze.
+     * @param array $params Additional parameters to use in resolution.
+     *
+     * @return array Resolved method arguments.
+     */
+    private function resolveMethodParameters(ReflectionMethod|ReflectionFunction $method, array $params = []): array
+    {
+        $args = [];
 
-            return $value;
+        $isAsociativeParams = Arr::isAssociative($params);
+
+        $this->validateDependencies($params);
+
+        foreach ($method->getParameters() as $key => $reflectionParameter) {
+            $type = $reflectionParameter->getType();
+            $name = $reflectionParameter->getName();
+
+            $key = $isAsociativeParams ? $name : $key;
+
+            $classNames = $this->getClassName($type);
+
+            if ($reflectionParameter->isVariadic() === true) {
+                $resolvedParams = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
+                $varadicArgs = is_array($resolvedParams) ? $resolvedParams : [$resolvedParams];
+
+                $args = [...$args, ...$varadicArgs];
+            } else {
+                $args[] = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
+            }
         }
 
-        if (array_key_exists(0, $params) && $params[0] instanceof $className) {
-            return array_shift($params);
-        }
-
-        if ($reflectionParameter->isDefaultValueAvailable()) {
-            return $reflectionParameter->getDefaultValue();
-        }
-
-        unset($params[$key]);
-
-        return $this->container->get($className);
+        return $this->resolveDependencies($args);
     }
 
     /**
      * Validates the format of dependencies passed during object creation.
      *
-     * @param array $parameters The parameters to validate.
+     * Ensures dependencies are provided in a valid format:
+     * - Numeric (indexed) array.
+     * - Associative array.
      *
-     * @throws InvalidConfig If dependencies are not in the correct format.
+     * @param array $parameters Dependencies to validate.
+     *
+     * @throws InvalidDefinition If dependencies are in an invalid format.
      */
     private function validateDependencies(array $parameters): void
     {
@@ -398,6 +485,6 @@ class ReflectionFactory
             return;
         }
 
-        throw new InvalidConfig(Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
+        throw new InvalidDefinition(Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
     }
 }

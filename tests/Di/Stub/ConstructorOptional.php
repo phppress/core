@@ -10,10 +10,14 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class ConstructorOptional
 {
-    public function __invoke(EngineInterface $engine): string
+    public function __construct(private EngineInterface|null $engine) {}
+
+    public function getConstructorArguments(): array
     {
-        return $engine->getName();
+        return [
+            'engine' => $this->engine?->getName(),
+        ];
     }
 }

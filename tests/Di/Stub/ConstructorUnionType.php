@@ -12,5 +12,20 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ConstructorUnionType
 {
-    public function __construct(protected string|int|float|bool $value) {}
+    public function __construct(protected EngineColorInterface|EngineInterface $engine) {}
+
+    public function getConstructorArguments(): array
+    {
+        $color = match ($this->engine instanceof EngineColorInterface) {
+            true => $this->engine->getColor(),
+            default => null,
+        };
+
+        $engine = match ($this->engine instanceof EngineInterface) {
+            true => $this->engine->getName(),
+            default => null,
+        };
+
+        return ['color' => $color, 'engine' => $engine];
+    }
 }

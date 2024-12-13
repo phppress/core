@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di;
 
-use PHPPress\Exception\InvalidConfig;
+use PHPPress\Exception\InvalidArgument;
 use PHPPress\Di\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -19,8 +19,8 @@ final class InstanceTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstructorException(): void
     {
-        $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: "The required component "id" is empty."');
+        $this->expectException(InvalidArgument::class);
+        $this->expectExceptionMessage('Invalid argument: "The required component "id" is empty."');
 
         Instance::of('');
     }

@@ -10,10 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+final class EngineCarTunning
 {
-    public function __invoke(EngineInterface $engine): string
+    public function __construct(private readonly EngineCar $engineCar) {}
+
+    public function getEngineCar(): EngineCar
     {
-        return $engine->getName();
+        return $this->engineCar;
     }
 }

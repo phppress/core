@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Provider;
 
-use PHPPress\Tests\Di\Stub\{Bar, Car, ColorInterface, EngineInterface, EngineMarkOne, EngineStorage, Kappa};
+use PHPPress\Tests\Di\Stub\{ClassInterface, EngineInterface, EngineMarkOne, EngineStorage};
 
 /**
  * Provider for the Container class.
@@ -23,32 +23,10 @@ final class ContainerProvider
     {
         return [
             [false, 'non_existing'],
-            [false, ColorInterface::class],
-            [true, Car::class],
-            [true, EngineMarkOne::class],
+            [false, ClassInterface::class],
             [true, EngineInterface::class],
+            [true, EngineMarkOne::class],
             [true, EngineStorage::class],
-        ];
-    }
-
-    /**
-     * Data provider for the get method.
-     *
-     * @phpstan-return array<array{class-string, string}>
-     */
-    public static function notfountException(): array
-    {
-        return [
-            [
-                Bar::class,
-                'Not instantiable exception: "Missing required parameter "definitionInstance" when instantiating "'
-                . Bar::class . '"."',
-            ],
-            [
-                Kappa::class,
-                'Not instantiable exception: "Missing required parameter "unknown" when instantiating "'
-                . Kappa::class . '"."',
-            ],
         ];
     }
 }

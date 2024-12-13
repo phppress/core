@@ -10,10 +10,8 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Invokeable
+interface EngineColorInterface
 {
-    public function __invoke(EngineInterface $engine): string
-    {
-        return $engine->getName();
-    }
+    public function getColor(): string;
+    public function setColor(string $value): void;
 }
