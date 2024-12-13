@@ -123,6 +123,30 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\Instance::class, $container->get('instance'));
     }
 
+    public function testSetSingletonUsingDefinitionWithInstanceClassArguments(): void
+    {
+        $container = $this->createContainer();
+
+        $container->setSingleton('instance', Instance::of(Stub\Instance::class));
+
+        $instance = $container->get('instance');
+
+        $this->assertTrue($container->hasSingleton('instance'));
+        $this->assertInstanceOf(Stub\Instance::class, $instance);
+    }
+
+    public function testSetSingletonUsingDefinitionWithObjectArguments(): void
+    {
+        $container = $this->createContainer();
+
+        $container->setSingleton('instance', new Stub\Instance());
+
+        $instance = $container->get('instance');
+
+        $this->assertTrue($container->hasSingleton('instance'));
+        $this->assertInstanceOf(Stub\Instance::class, $instance);
+    }
+
     public function testWiringByClosure(): void
     {
         $container = $this->createContainer(
