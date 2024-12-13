@@ -21,8 +21,12 @@ use ReflectionUnionType;
 use Throwable;
 
 use function array_key_exists;
+use function get_class;
 use function in_array;
 use function is_array;
+use function method_exists;
+use function str_ends_with;
+use function substr;
 
 /**
  * Reflection Factory for dependency creation and resolution.
@@ -127,10 +131,9 @@ class ReflectionFactory
     public function create(string $class, array $definitions = []): mixed
     {
         $constructorParams = $definitions['__construct()'] ?? [];
-        unset($definitions['__construct()']);
-
         $invokeDefinitions = $definitions['__invoke()'] ?? [];
-        unset($definitions['__invoke()']);
+
+        unset($definitions['__construct()'], $definitions['__invoke()']);
 
         $object = $this->createInstance($class, $constructorParams);
 
@@ -171,7 +174,9 @@ class ReflectionFactory
      */
     public function invoke(array|callable|Closure|string $callback, array $params = []): mixed
     {
-        return call_user_func_array($callback, $this->handleCallableDependencies($callback, $params));
+        $resolvedParams = $this->handleCallableDependencies($callback, $params);
+
+        return $callback(...$resolvedParams);
     }
 
     /**
