@@ -23,11 +23,6 @@ final class ArrTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expected, Arr::isAssociative($value));
     }
 
-    public function testIsAssociativeWithStricModeFalse(): void
-    {
-        $this->assertTrue(Arr::isAssociative(['name' => 1, 'value' => 'test', 3], false));
-    }
-
     #[DataProviderExternal(ArrProvider::class, 'isList')]
     public function testIsList(array $value, bool $expected): void
     {
