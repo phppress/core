@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Di;
 
 use PHPPress\Di\{Container, ReflectionFactory};
-use PHPPress\Exception\InvalidConfig;
+use PHPPress\Exception\InvalidDefinition;
 use PHPUnit\Framework\Attributes\Group;
+use Psr\Container\ContainerInterface;
 
 /**
  * Test case for the ReflectionFactory class.
@@ -35,7 +36,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
 
     public function testResolveCallableDependenciesWithCallbackAsArray(): void
     {
-        $callback = [new Stub\ClassInvokeable(), '__invoke'];
+        $callback = [new Stub\InvokeablePSRContainer(), '__invoke'];
 
         $dependencies = $this->factory->resolveCallableDependencies(
             $callback,
@@ -43,13 +44,13 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertCount(1, $dependencies);
-        $this->assertInstanceOf(\Psr\Container\ContainerInterface::class, $dependencies[0]);
+        $this->assertInstanceOf(ContainerInterface::class, $dependencies[0]);
     }
 
     public function testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter(): void
     {
-        $this->expectException(InvalidConfig::class);
-        $this->expectExceptionMessage('Invalid configuration: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():54}"."');
+        $this->expectException(InvalidDefinition::class);
+        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\ReflectionFactoryTest::testResolveCallableDependenciesThrowsExceptionForMissingRequiredParameter():55}"."');
 
         $this->factory->resolveCallableDependencies(static fn(string $requiredParam) => $requiredParam);
     }
@@ -58,7 +59,7 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
     {
         $result = $this->factory->resolveCallableDependencies(
             static fn(string $param1, ...$additionalParams): array => [$param1, $additionalParams],
-            ['First', 'Second', 'Third'],
+            ['First', ['Second', 'Third']],
         );
 
         $this->assertCount(3, $result);

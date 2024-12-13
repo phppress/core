@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PHPPress\Di;
 
 use PHPPress\Di\Exception\{Message, NotInstantiable};
-use PHPPress\Exception\InvalidConfig;
+use PHPPress\Exception\{InvalidArgument, InvalidDefinition};
 use Psr\Container\ContainerInterface;
 use Throwable;
+use TypeError;
 
 use function array_key_exists;
 use function gettype;
@@ -69,7 +70,7 @@ class Container implements ContainerInterface
      * - Values are singleton object configurations.
      * - Ensures only one instance of specified classes will be created.
      *
-     * @throws InvalidConfig If any provided definitions are invalid.
+     * @throws InvalidDefinition If any provided definitions are invalid.
      *
      * ```php
      * $container = new Container(
@@ -103,8 +104,8 @@ class Container implements ContainerInterface
      *
      * @param string $id The fully qualified class name, interface name, or alias of the dependency to retrieve.
      *
+     * @throws InvalidDefinition If the requested dependency has an invalid configuration.
      * @throws NotInstantiable If the dependency cannot be instantiated or resolved.
-     * @throws InvalidConfig If the requested dependency has an invalid configuration.
      *
      * @return mixed The fully resolved and instantiated dependency.
      *
@@ -116,8 +117,8 @@ class Container implements ContainerInterface
     {
         try {
             return $this->getInternal($id);
-        } catch (NotInstantiable $e) {
-            throw new NotInstantiable($e->getMessage());
+        } catch (TypeError $e) {
+            throw new InvalidArgument($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -177,7 +178,7 @@ class Container implements ContainerInterface
      * - A string representing another class name.
      * - An object instance.
      *
-     * @throws InvalidConfig If the provided definition is invalid or cannot be processed.
+     * @throws InvalidDefinition If the provided definition is invalid or cannot be processed.
      *
      * @return static The container instance for method chaining.
      *
@@ -217,7 +218,7 @@ class Container implements ContainerInterface
      * - Method call configurations.
      * - Initialization parameters.
      *
-     * @throws InvalidConfig If the provided definition is invalid or cannot be processed.
+     * @throws InvalidDefinition If the provided definition is invalid or cannot be processed.
      *
      * @return static The container instance for method chaining.
      *
@@ -252,7 +253,7 @@ class Container implements ContainerInterface
      * @param string $id The class Instance, name, or an alias name (e.g. `foo`) that was previously registered
      * via [[set()]] or [[setSingleton()]].
      *
-     * @throws InvalidConfig If the class cannot be recognized or correspond to an invalid definition.
+     * @throws InvalidDefinition If the class cannot be recognized or correspond to an invalid definition.
      * @throws NotInstantiable If resolved to an abstract class or an interface.
      * @throws Throwable In case of circular references.
      *
@@ -274,7 +275,7 @@ class Container implements ContainerInterface
         if ($definition === null) {
             $entry = $this->reflectionFactory->create($id);
 
-            if (is_callable($entry, true)) {
+            if (method_exists($entry, '__invoke')) {
                 $entry = $this->invoke($entry);
             }
 
@@ -289,11 +290,10 @@ class Container implements ContainerInterface
 
             unset($definition['class']);
 
-            $entry = $this->reflectionFactory->create($concrete, $definition);
-
-            if (is_callable($entry, true)) {
-                $entry = $this->invoke($entry, $definition['__invoke()'] ?? []);
-            }
+            $entry = match (method_exists($concrete, '__invoke')) {
+                true => $this->invoke($this->reflectionFactory->create($concrete), $definition['__invoke()'] ?? []),
+                default => $this->reflectionFactory->create($concrete, $definition),
+            };
         } elseif (is_object($definition)) {
             return $this->singletons[$id] = $definition;
         }
@@ -327,10 +327,9 @@ class Container implements ContainerInterface
      */
     private function invoke(callable $callback, array $params = []): mixed
     {
-        return call_user_func_array(
-            $callback,
-            $this->reflectionFactory->resolveCallableDependencies($callback, $params),
-        );
+        $resolvedParams = $this->reflectionFactory->resolveCallableDependencies($callback, $params);
+
+        return $callback(...$resolvedParams);
     }
 
 
@@ -340,7 +339,7 @@ class Container implements ContainerInterface
      * @param string $class The class name.
      * @param mixed $definition The class definition.
      *
-     * @throws InvalidConfig If the definition is invalid.
+     * @throws InvalidDefinition If the definition is invalid.
      *
      * @return array|callable|string|object The normalized class definition.
      */
@@ -352,7 +351,7 @@ class Container implements ContainerInterface
 
         if (is_string($definition)) {
             if ($this->reflectionFactory->canBeAutowired($definition) === false) {
-                throw new InvalidConfig(Message::DEFINITION_INVALID->getMessage($class, $definition));
+                throw new InvalidDefinition(Message::DEFINITION_INVALID->getMessage($class, $definition));
             }
 
             return ['class' => $definition];
@@ -377,14 +376,14 @@ class Container implements ContainerInterface
                 if (str_contains($class, '\\')) {
                     $definition['class'] = $class;
                 } else {
-                    throw new InvalidConfig(Message::DEFINITION_REQUIRES_CLASS_OPTION->getMessage());
+                    throw new InvalidDefinition(Message::DEFINITION_REQUIRES_CLASS_OPTION->getMessage());
                 }
             }
 
             return $definition;
         }
 
-        throw new InvalidConfig(Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
+        throw new InvalidDefinition(Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
     }
 
     /**
@@ -394,7 +393,7 @@ class Container implements ContainerInterface
      * 1. Simple format: [className]
      * 2. Complex format: [className => definitionConfig]
      *
-     * @throws InvalidConfig If any definition is invalid.
+     * @throws InvalidDefinition If any definition is invalid.
      *
      * ```php
      * // Simple format
@@ -431,7 +430,7 @@ class Container implements ContainerInterface
      *   1. Simple format: [singletonClassName]
      *   2. Complex format: [singletonClassName => definitionConfig]
      *
-     * @throws InvalidConfig If any singleton definition is invalid.
+     * @throws InvalidDefinition If any singleton definition is invalid.
      *
      * ```php
      * // Simple format
