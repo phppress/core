@@ -95,6 +95,176 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(42, $instance->getA());
     }
 
+    public function testDefinitionUsingIndexedParametersMethodsWithServeralArguments(): void
+    {
+        $callable = static function (): int {
+            return 42;
+        };
+        $object = new Stub\Instance();
+        $objectCommon = new \stdClass();
+
+        $container = $this->createContainer(
+            [
+                Stub\InstanceMethodSeveralArguments::class => [
+                    'compoundTypes()' => [[1, 2, 3], $callable, [4, 5, 6], $object],
+                    'commonArguments()' => [[7, 8, 9], $objectCommon],
+                    'scalarTypes()' => [true, 3.14, 42, 'scalar'],
+                ],
+            ],
+        );
+
+        $instance = $container->get(Stub\InstanceMethodSeveralArguments::class);
+
+        $this->assertSame(
+            [
+                'compoundTypes' => [
+                    'array' => [1, 2, 3],
+                    'callable' => $callable,
+                    'iterable' => [4, 5, 6],
+                    'object' => $object,
+                ],
+                'scalarTypes' => [
+                    'boolean' => true,
+                    'float' => 3.14,
+                    'integer' => 42,
+                    'string' => 'scalar',
+                ],
+            ],
+            $instance->getArguments(),
+        );
+        $this->assertSame(
+            [
+                'common' => [
+                    'array' => [7, 8, 9],
+                    'object' => $objectCommon,
+                ],
+            ],
+            $instance->getCommonArguments(),
+        );
+    }
+
+    public function testDefinitionUsingNamedParametersMethodsWithServeralArguments(): void
+    {
+        $callable = static function (): int {
+            return 42;
+        };
+        $object = new Stub\Instance();
+        $objectCommon = new \stdClass();
+
+        $container = $this->createContainer(
+            [
+                Stub\InstanceMethodSeveralArguments::class => [
+                    'compoundTypes()' => [
+                        'array' => [1, 2, 3],
+                        'callable' => $callable,
+                        'iterable' => [4, 5, 6],
+                        'object' => $object,
+                    ],
+                    'commonArguments()' => [
+                        'array' => [7, 8, 9],
+                        'object' => $objectCommon,
+                    ],
+                    'scalarTypes()' => [
+                        'boolean' => true,
+                        'float' => 3.14,
+                        'integer' => 42,
+                        'string' => 'scalar',
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get(Stub\InstanceMethodSeveralArguments::class);
+
+        $this->assertSame(
+            [
+                'compoundTypes' => [
+                    'array' => [1, 2, 3],
+                    'callable' => $callable,
+                    'iterable' => [4, 5, 6],
+                    'object' => $object,
+                ],
+                'scalarTypes' => [
+                    'boolean' => true,
+                    'float' => 3.14,
+                    'integer' => 42,
+                    'string' => 'scalar',
+                ],
+            ],
+            $instance->getArguments(),
+        );
+        $this->assertSame(
+            [
+                'common' => [
+                    'array' => [7, 8, 9],
+                    'object' => $objectCommon,
+                ],
+            ],
+            $instance->getCommonArguments(),
+        );
+    }
+
+    public function testDefinitionUsingNamedParametersMethodsWithServeralArgumentsDisordered(): void
+    {
+        $callable = static function (): int {
+            return 42;
+        };
+        $object = new Stub\Instance();
+        $objectCommon = new \stdClass();
+
+        $container = $this->createContainer(
+            [
+                Stub\InstanceMethodSeveralArguments::class => [
+                    'compoundTypes()' => [
+                        'callable' => $callable,
+                        'object' => $object,
+                        'array' => [1, 2, 3],
+                        'iterable' => [4, 5, 6],
+                    ],
+                    'commonArguments()' => [
+                        'object' => $objectCommon,
+                        'array' => [7, 8, 9],
+                    ],
+                    'scalarTypes()' => [
+                        'string' => 'scalar',
+                        'integer' => 42,
+                        'boolean' => true,
+                        'float' => 3.14,
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get(Stub\InstanceMethodSeveralArguments::class);
+
+        $this->assertSame(
+            [
+                'compoundTypes' => [
+                    'array' => [1, 2, 3],
+                    'callable' => $callable,
+                    'iterable' => [4, 5, 6],
+                    'object' => $object,
+                ],
+                'scalarTypes' => [
+                    'boolean' => true,
+                    'float' => 3.14,
+                    'integer' => 42,
+                    'string' => 'scalar',
+                ],
+            ],
+            $instance->getArguments(),
+        );
+        $this->assertSame(
+            [
+                'common' => [
+                    'array' => [7, 8, 9],
+                    'object' => $objectCommon,
+                ],
+            ],
+            $instance->getCommonArguments(),
+        );
+    }
+
     public function testDefinitionsUsingMethodsAndProperties(): void
     {
         $container = $this->createContainer(
@@ -113,6 +283,44 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(42, $instance->getA());
         $this->assertSame(142, $instance->getB());
         $this->assertSame(242, $instance->c);
+    }
+
+    public function testFailsForDefinitionUsingInstanceClassWithMethodPrivate(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodPrivate::class,
+                    'privateMethod()' => ['invalid'],
+                ]
+            ],
+        );
+
+        $this->expectException(InvalidDefinition::class);
+        $this->expectExceptionMessage(
+            'Invalid definition: "Method "privateMethod" in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate" is not publicly accessible."'
+        );
+
+        $container->get('instance');
+    }
+
+    public function testFailsForDefinitionUsingInstanceClassWithMethodNotFound(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodPrivate::class,
+                    'noExist()' => ['invalid'],
+                ]
+            ],
+        );
+
+        $this->expectException(InvalidDefinition::class);
+        $this->expectExceptionMessage(
+            'Invalid definition: "Method "noExist" not found in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate"."'
+        );
+
+        $container->get('instance');
     }
 
     public function testFailsForInvalidDefinitionWithIntegerValue(): void
@@ -209,7 +417,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(1000, $instance->d);
     }
 
-    public function testInstanceClassArguments(): void
+    public function testInstanceReferenceClassArguments(): void
     {
         $container = $this->createContainer(
             [
@@ -235,6 +443,33 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(0, $instance->getB());
     }
 
+    public function testMagicMethod(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\InstanceMagicMethods::class => [
+                    '__clone()' => [],
+                    '__debugInfo()' => [],
+                    '__destruct()' => [],
+                    '__get()' => ['name'],
+                    '__isset()' => ['name'],
+                    '__set()' => ['name', 'Magic Method'],
+                    '__toString()' => [],
+                    '__wakeup()' => [],
+                ],
+            ],
+        );
+
+        $instance = $container->get(Stub\InstanceMagicMethods::class);
+
+        $this->assertInstanceOf(Stub\InstanceMagicMethods::class, $instance);
+        $this->assertSame('default', $instance->name);
+
+        $instance->name = 'Magic Method';
+
+        $this->assertSame('Magic Method', $instance->name);
+    }
+
     public function testMultipleGetCallsCreateDifferentInstances(): void
     {
         $container = $this->createContainer();
@@ -253,6 +488,229 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $instanceTwo = $container->get(Stub\Instance::class);
 
         $this->assertSame($instanceOne, $instanceTwo);
+    }
+
+    public function testVariadicMethodDefinitionUsingIndexedParameters(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadic()' => [[new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()]],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(['variadic' => ['Mark One', 'Mark Two']], $instance->getVariadic());
+    }
+
+    public function testVariadicMethodDefinitionUsingIndexedParametersAndCompundTypesAndSeveralArguments(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicCompundTypes()' => [[1, 2, 3], [new Stub\EngineMarkTwo(), null]],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'compundTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => ['red', null]
+                ],
+            ],
+            $instance->getVariadicCompundTypes(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingIndexedParametersAndScalarTypesAndSeveralArguments(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicScalarTypes()' => [[1, 2, 3], [true, 1, 3.14, 'scalar']],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'scalarTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => [true, 1, 3.14, 'scalar'],
+                ],
+            ],
+            $instance->getVariadicScalarTypes(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParameters(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadic()' => ['variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()]],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(['variadic' => ['Mark One', 'Mark Two']], $instance->getVariadic());
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParametersAndCompundTypesAndSeveralArguments(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicCompundTypes()' => [
+                        'array' => [1, 2, 3],
+                        'variadic' => [new Stub\EngineMarkTwo(), null],
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'compundTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => ['red', null]
+                ],
+            ],
+            $instance->getVariadicCompundTypes(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParametersAndScalarTypesAndSeveralArguments(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicScalarTypes()' => [
+                        'array' => [1, 2, 3],
+                        'variadic' => [true, 1, 3.14, 'scalar'],
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'scalarTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => [true, 1, 3.14, 'scalar'],
+                ],
+            ],
+            $instance->getVariadicScalarTypes(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParametersAndCompundTypesAndSeveralArgumentsDisordered(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicCompundTypes()' => [
+                        'variadic' => [new Stub\EngineMarkTwo(), null],
+                        'array' => [1, 2, 3],
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'compundTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => ['red', null]
+                ],
+            ],
+            $instance->getVariadicCompundTypes(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParametersAndOptionalSeveralArguments(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicOptional()' => [
+                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'optional' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => ['Mark One', 'Mark Two'],
+                ],
+            ],
+            $instance->getVariadicOptional(),
+        );
+    }
+
+    public function testVariadicMethodDefinitionUsingNamedParametersAndScalarTypesAndSeveralArgumentsDisordered(): void
+    {
+        $container = $this->createContainer(
+            [
+                'instance' => [
+                    '__class' => Stub\InstanceMethodVariadic::class,
+                    'variadicScalarTypes()' => [
+                        'variadic' => [true, 1, 3.14, 'scalar'],
+                        'array' => [1, 2, 3],
+                    ],
+                ],
+            ],
+        );
+
+        $instance = $container->get('instance');
+
+        $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
+        $this->assertSame(
+            [
+                'scalarTypes' => [
+                    'array' => [1, 2, 3],
+                    'variadic' => [true, 1, 3.14, 'scalar'],
+                ],
+            ],
+            $instance->getVariadicScalarTypes(),
+        );
     }
 
     private function createContainer($definitions = [], $singletons = []): Container

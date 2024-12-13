@@ -273,27 +273,18 @@ class Container implements ContainerInterface
         $entry = null;
 
         if ($definition === null) {
-            $entry = $this->reflectionFactory->create($id);
-
-            if (method_exists($entry, '__invoke')) {
-                $entry = $this->invoke($entry);
-            }
-
-            return $entry;
+            return $this->reflectionFactory->create($id);
         }
 
         if (is_callable($definition, true)) {
-            $entry = $this->invoke($definition);
+            $entry = $this->reflectionFactory->invoke($definition);
         } elseif (is_array($definition)) {
             $concrete = $definition['class'];
             $definition = $this->definitions[$concrete] ?? $definition;
 
             unset($definition['class']);
 
-            $entry = match (method_exists($concrete, '__invoke')) {
-                true => $this->invoke($this->reflectionFactory->create($concrete), $definition['__invoke()'] ?? []),
-                default => $this->reflectionFactory->create($concrete, $definition),
-            };
+            $entry = $this->reflectionFactory->create($concrete, $definition);
         } elseif (is_object($definition)) {
             return $this->singletons[$id] = $definition;
         }
@@ -304,34 +295,6 @@ class Container implements ContainerInterface
 
         return $entry;
     }
-
-    /**
-     * Invoke a callback with resolving dependencies in parameters.
-     *
-     * This method allows invoking a callback and let type hinted parameter names to be resolved as objects of the
-     * Container. It additionally allows calling function using named parameters.
-     *
-     * For example, the following callback may be invoked using the Container to resolve the formatter dependency:
-     *
-     * ```php
-     * ```
-     *
-     * This will pass the string `'Hello World!'` as the first param, and a formatter instance created by the DI
-     * container as the second param to the callable.
-     *
-     * @param callable $callback The callable to be invoked.
-     * @param array $params The array of parameters for the function. This can be either a list of parameters or an
-     * associative array representing named function parameters.
-     *
-     * @return mixed The callback return value.
-     */
-    private function invoke(callable $callback, array $params = []): mixed
-    {
-        $resolvedParams = $this->reflectionFactory->resolveCallableDependencies($callback, $params);
-
-        return $callback(...$resolvedParams);
-    }
-
 
     /**
      * Normalizes the class definition.
