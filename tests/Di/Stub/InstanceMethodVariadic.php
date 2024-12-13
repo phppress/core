@@ -62,7 +62,7 @@ final class InstanceMethodVariadic
                 'array' => $this->array,
                 'variadic' => array_map(
                     static fn(EngineColorInterface|null $engine): string|null => $engine?->getColor(),
-                    $this->variadic
+                    $this->variadic,
                 ),
             ],
         ];

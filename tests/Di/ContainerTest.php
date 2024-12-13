@@ -7,7 +7,6 @@ namespace PHPPress\Tests\Di;
 use PHPPress\Di\{Container, Instance};
 use PHPPress\Tests\Provider\ContainerProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
-use Psr\Container\ContainerInterface;
 
 /**
  * Test case for the Container class.

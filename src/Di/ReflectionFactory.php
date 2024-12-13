@@ -193,7 +193,7 @@ class ReflectionFactory
 
             if ($reflection->isPublic() === false) {
                 throw new InvalidDefinition(
-                    Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object))
+                    Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object)),
                 );
             }
 
@@ -203,7 +203,7 @@ class ReflectionFactory
             return $result instanceof $object ? $result : $object;
         } catch (ReflectionException $e) {
             throw new InvalidDefinition(
-                Message::METHOD_NOT_FOUND->getMessage($method, get_class($object))
+                Message::METHOD_NOT_FOUND->getMessage($method, get_class($object)),
             );
         }
     }
@@ -613,7 +613,7 @@ class ReflectionFactory
             '__wakeup',
         ];
 
-        return in_array($methodName, $skippedMethods);
+        return in_array($methodName, $skippedMethods, true);
     }
 
     /**

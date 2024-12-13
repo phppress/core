@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Di;
 
 use PHPPress\Di\{Container, ReflectionFactory};
-use PHPPress\Exception\InvalidDefinition;
 use PHPUnit\Framework\Attributes\Group;
-use Psr\Container\ContainerInterface;
 
 /**
  * Test case for the ReflectionFactory class.

@@ -292,13 +292,13 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodPrivate::class,
                     'privateMethod()' => ['invalid'],
-                ]
+                ],
             ],
         );
 
         $this->expectException(InvalidDefinition::class);
         $this->expectExceptionMessage(
-            'Invalid definition: "Method "privateMethod" in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate" is not publicly accessible."'
+            'Invalid definition: "Method "privateMethod" in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate" is not publicly accessible."',
         );
 
         $container->get('instance');
@@ -311,13 +311,13 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodPrivate::class,
                     'noExist()' => ['invalid'],
-                ]
+                ],
             ],
         );
 
         $this->expectException(InvalidDefinition::class);
         $this->expectExceptionMessage(
-            'Invalid definition: "Method "noExist" not found in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate"."'
+            'Invalid definition: "Method "noExist" not found in class "PHPPress\Tests\Di\Stub\InstanceMethodPrivate"."',
         );
 
         $container->get('instance');
@@ -525,7 +525,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'compundTypes' => [
                     'array' => [1, 2, 3],
-                    'variadic' => ['red', null]
+                    'variadic' => ['red', null],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
@@ -595,7 +595,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'compundTypes' => [
                     'array' => [1, 2, 3],
-                    'variadic' => ['red', null]
+                    'variadic' => ['red', null],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
@@ -651,7 +651,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'compundTypes' => [
                     'array' => [1, 2, 3],
-                    'variadic' => ['red', null]
+                    'variadic' => ['red', null],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
