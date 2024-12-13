@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PHPPress\Helper;
 
 use function array_all;
-use function array_any;
 use function is_string;
 
 /**
@@ -33,24 +32,16 @@ abstract class AbstractArray
     /**
      * Returns a value indicating whether the given array is an associative array.
      *
-     * An array is associative if all its keys are strings. If strict is true, the method will only consider an array
-     * associative if its keys are all strings and not all its keys are integers.
-     *
-     * Note that an empty array will NOT be considered associative.
+     * An array is associative if all its keys are strings.
      *
      * @param array $array The array being checked.
-     * @param bool $strictMode Whether to check if the array is strictly associative.
      *
-     * @return bool Whether the array is associative.
+     * @return bool Whether the array is associative. That an empty array will NOT be considered associative.
      */
-    public static function isAssociative(array $array, bool $strictMode = true): bool
+    public static function isAssociative(array $array): bool
     {
         if ($array === []) {
             return false;
-        }
-
-        if ($strictMode === false) {
-            return array_any($array, static fn(mixed $_value, int|string $key) => is_string($key));
         }
 
         return array_all($array, static fn(mixed $_value, int|string $key) => is_string($key));
