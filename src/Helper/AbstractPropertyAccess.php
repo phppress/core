@@ -82,32 +82,6 @@ abstract class AbstractPropertyAccess
     }
 
     /**
-     * Determines whether a property can be retrieved from an object.
-     *
-     * A property is considered readable if:
-     *
-     * - The class has a getter method for the specified property name  (property name is case-insensitive);
-     * - The class has a member variable with the specified name (when `$stricMode` is `false`);
-     *
-     * @param object $object The object to check for property readability.
-     * @param string $name The name of the property to check.
-     * @param bool $stricMode Whether to consider member variables as readable properties. Defaults to `true`.
-     *
-     * @return bool `true` if the property can be read, `false` otherwise.
-     *
-     * @see isWritable()
-     */
-    public static function isReadable(object $object, string $name, bool $stricMode = true): bool
-    {
-        $getter = "get{$name}";
-        $reflection = self::getReflection($object);
-
-        return $stricMode === false
-            ? static::hasMethod($object, $getter)
-            : $reflection->hasProperty($name) && static::hasMethod($object, $getter);
-    }
-
-    /**
      * Checks if a property is set, i.e. defined and not `null`.
      *
      * Do not call this method directly as it is a PHP magic method that will be implicitly called when executing
@@ -144,6 +118,32 @@ abstract class AbstractPropertyAccess
     public static function isSubclassOf(object|string $object, string $class, bool $allowString = true): bool
     {
         return is_subclass_of($object, $class, $allowString);
+    }
+
+    /**
+     * Determines whether a property can be retrieved from an object.
+     *
+     * A property is considered readable if:
+     *
+     * - The class has a getter method for the specified property name  (property name is case-insensitive);
+     * - The class has a member variable with the specified name (when `$stricMode` is `false`);
+     *
+     * @param object $object The object to check for property readability.
+     * @param string $name The name of the property to check.
+     * @param bool $stricMode Whether to consider member variables as readable properties. Defaults to `true`.
+     *
+     * @return bool `true` if the property can be read, `false` otherwise.
+     *
+     * @see isWritable()
+     */
+    public static function isReadable(object $object, string $name, bool $stricMode = true): bool
+    {
+        $getter = "get{$name}";
+        $reflection = self::getReflection($object);
+
+        return $stricMode === false
+            ? static::hasMethod($object, $getter)
+            : $reflection->hasProperty($name) && static::hasMethod($object, $getter);
     }
 
     /**
