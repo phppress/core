@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Di\Exception;
+namespace PHPPress\Factory\Exception;
 
 /**
  * Represents the exception message for the Di component.

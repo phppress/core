@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Di\Exception;
+namespace PHPPress\Factory\Exception;
+
+use Exception;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Represents an exception caused by incorrect dependency injection container configuration or usage.
@@ -10,7 +13,7 @@ namespace PHPPress\Di\Exception;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class NotInstantiable extends \Exception
+final class NotInstantiable extends Exception implements NotFoundExceptionInterface
 {
     public function __construct(string $message = '', int $code = 0, \Throwable|null $previous = null)
     {

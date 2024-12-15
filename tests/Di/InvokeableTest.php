@@ -8,7 +8,8 @@ use ArrayIterator;
 use DateTime;
 use PHPPress\Exception\{InvalidArgument, InvalidDefinition};
 use Psr\Container\ContainerInterface;
-use PHPPress\Di\{Container, Instance};
+use PHPPress\Di\Container;
+use PHPPress\Factory\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -518,7 +519,7 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->expectException(InvalidDefinition::class);
-        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():516}"."');
+        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():517}"."');
 
         $container->get('instance');
     }

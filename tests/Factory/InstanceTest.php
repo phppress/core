@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Tests\Di;
+namespace PHPPress\Tests\Factory;
 
 use PHPPress\Exception\InvalidArgument;
-use PHPPress\Di\Instance;
+use PHPPress\Factory\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-#[Group('di')]
+#[Group('factory')]
 final class InstanceTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstructorException(): void
