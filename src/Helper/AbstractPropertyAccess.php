@@ -12,7 +12,7 @@ use function method_exists;
 use function property_exists;
 
 /**
- * Provides concrete implementation for [[PropertyAccess]].
+ * Provides concrete implementation for {PropertyAccess}.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}

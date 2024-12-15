@@ -10,7 +10,7 @@ use PHPPress\Exception\InvalidArgument;
 /**
  * Instance represents a reference to a named object in a dependency injection (DI) container or a service locator.
  *
- * You may use [[get()]] to get the actual object referenced by [[id]].
+ * You may use {get()} to get the actual object referenced by {id}.
  *
  * Instance is mainly used in two places:
  *

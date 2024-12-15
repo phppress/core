@@ -247,11 +247,11 @@ class Container implements ContainerInterface
     /**
      * Returns an instance of the requested class.
      *
-     * Note that if the class is declared to be singleton by calling [[setSingleton()]], the same instance of the class
+     * Note that if the class is declared to be singleton by calling {setSingleton()}, the same instance of the class
      * will be returned each time this method is called.
      *
      * @param string $id The class Instance, name, or an alias name (e.g. `foo`) that was previously registered
-     * via [[set()]] or [[setSingleton()]].
+     * via {set()} or {setSingleton()}.
      *
      * @throws InvalidDefinition If the class cannot be recognized or correspond to an invalid definition.
      * @throws NotInstantiable If resolved to an abstract class or an interface.

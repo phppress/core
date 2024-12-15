@@ -8,7 +8,7 @@ use function str_ends_with;
 use function substr;
 
 /**
- * Provides concrete implementation for [[Configure]].
+ * Provides concrete implementation for {Configure}.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
