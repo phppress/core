@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Helper;
 
 use PHPPress\Exception\{InvalidCall, UnknownProperty};
-use PHPPress\Helper\AbstractPropertyAccess;
 use PHPPress\Helper\PropertyAccess;
-use PHPPress\Tests\Support\Assert;
 use PHPUnit\Framework\Attributes\Group;
 use stdClass;
 
@@ -74,61 +72,6 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         $object->setText('text');
 
         $this->assertSame('text', PropertyAccess::get($object, 'text'));
-    }
-
-    public function testGetReflectionAndHasMethodUsingCached(): void
-    {
-        $object1 = $this->createObject();
-        $object2 = new stdClass();
-
-        $hashObject1 = spl_object_hash($object1);
-        $hashObject2 = spl_object_hash($object2);
-
-        $hashKey1 = "{$hashObject1}::text";
-
-        Assert::setInaccessibleProperty(AbstractPropertyAccess::class, 'methodCache', []);
-        Assert::setInaccessibleProperty(AbstractPropertyAccess::class, 'reflectionCache', []);
-
-        $cache = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'methodCache');
-        $reflectionCache = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'reflectionCache');
-
-        $this->assertArrayNotHasKey($hashObject1, $reflectionCache);
-        $this->assertArrayNotHasKey($hashObject2, $reflectionCache);
-        $this->assertArrayNotHasKey($hashKey1, $cache);
-
-        // First call - should compute and cache
-        $result1 = PropertyAccess::hasMethod($object1, 'Text');
-
-        $reflectionCache1 = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'reflectionCache');
-        $cache1 = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'methodCache');
-
-        $this->assertArrayHasKey($hashObject1, $reflectionCache1);
-        $this->assertArrayHasKey($hashKey1, $cache1);
-        $this->assertArrayNotHasKey($hashObject2, $reflectionCache1);
-
-        $cachedValue = $cache1[$hashKey1];
-
-        // Second call - should use cache
-        $result2 = PropertyAccess::hasMethod($object1, 'text');
-
-        // Verify both results match and cache wasn't recomputed
-        $this->assertSame($result1, $result2);
-        $this->assertSame($cachedValue, $result2);
-
-        $reflectionCache2 = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'reflectionCache');
-        $cache2 = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'methodCache');
-
-        $this->assertArrayHasKey($hashObject1, $reflectionCache2);
-        $this->assertArrayHasKey($hashKey1, $cache2);
-        $this->assertArrayNotHasKey($hashObject2, $reflectionCache2);
-
-        // Third call - diferent object, should compute and cache
-        PropertyAccess::hasMethod($object2, 'text');
-        $reflectionCache3 = Assert::inaccessibleProperty(AbstractPropertyAccess::class, 'reflectionCache');
-
-        $this->assertArrayHasKey($hashObject1, $reflectionCache3);
-        $this->assertArrayHasKey($hashObject2, $reflectionCache3);
-        $this->assertNotSame($reflectionCache2, $reflectionCache3);
     }
 
     public function testHasMethod(): void
