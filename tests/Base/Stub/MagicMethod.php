@@ -45,7 +45,5 @@ final class MagicMethod
         $this->text = $value;
     }
 
-    public function setWriteOnly(): void
-    {
-    }
+    public function setWriteOnly(): void {}
 }
