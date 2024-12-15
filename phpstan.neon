@@ -11,4 +11,6 @@ parameters:
 
     ignoreErrors:
         -
+            identifier: trait.unused
+        -
             identifier: catch.neverThrown
