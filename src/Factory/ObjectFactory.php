@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Di;
+namespace PHPPress\Factory;
 
 use PHPPress\Exception\InvalidConfig;
 
@@ -12,9 +12,7 @@ use PHPPress\Exception\InvalidConfig;
  */
 final class ObjectFactory
 {
-    public function __construct(private readonly ReflectionFactory $reflectionFactory)
-    {
-    }
+    public function __construct(private readonly ReflectionFactory $reflectionFactory) {}
 
     /**
      * Creates an object from the given definition.

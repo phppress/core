@@ -6,7 +6,6 @@ namespace PHPPress\Factory;
 
 use Closure;
 use PHPPress\Exception\InvalidDefinition;
-use PHPPress\Factory\Exception\{Message, NotInstantiable};
 use PHPPress\Helper\Arr;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
@@ -128,7 +127,7 @@ class ReflectionFactory
      * ```
      *
      * @throws InvalidDefinition If dependency definition is incorrect.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws ReflectionException If reflection fails.
      *
      * @return mixed The fully constructed and configured object instance.
@@ -202,7 +201,7 @@ class ReflectionFactory
 
         if (is_string($definition)) {
             if ($this->canBeAutowired($definition) === false) {
-                throw new InvalidDefinition(Message::DEFINITION_INVALID->getMessage($class, $definition));
+                throw new InvalidDefinition(Exception\Message::DEFINITION_INVALID->getMessage($class, $definition));
             }
 
             return ['class' => $definition];
@@ -227,14 +226,14 @@ class ReflectionFactory
                 if (str_contains($class, '\\')) {
                     $definition['class'] = $class;
                 } else {
-                    throw new InvalidDefinition(Message::DEFINITION_REQUIRES_CLASS_OPTION->getMessage());
+                    throw new InvalidDefinition(Exception\Message::DEFINITION_REQUIRES_CLASS_OPTION->getMessage());
                 }
             }
 
             return $definition;
         }
 
-        throw new InvalidDefinition(Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
+        throw new InvalidDefinition(Exception\Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
     }
 
     /**
@@ -245,7 +244,7 @@ class ReflectionFactory
      * @param array $definitions Method call configurations and parameters.
      *
      * @throws InvalidDefinition If the method is not accessible or not found.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws ReflectionException If reflection fails.
      *
      * @return object Configured object.
@@ -256,7 +255,9 @@ class ReflectionFactory
             $reflection = new ReflectionMethod($object, $method);
 
             if ($reflection->isPublic() === false) {
-                throw new InvalidDefinition(Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object)));
+                throw new InvalidDefinition(
+                    Exception\Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object)),
+                );
             }
 
             $resolvedParams = $this->resolveMethodParameters($reflection, $definitions);
@@ -264,7 +265,7 @@ class ReflectionFactory
 
             return $result instanceof $object ? $result : $object;
         } catch (ReflectionException) {
-            throw new InvalidDefinition(Message::METHOD_NOT_FOUND->getMessage($method, get_class($object)));
+            throw new InvalidDefinition(Exception\Message::METHOD_NOT_FOUND->getMessage($method, get_class($object)));
         }
     }
 
@@ -275,7 +276,7 @@ class ReflectionFactory
      * @param array $constructorParams Constructor parameters.
      *
      * @throws InvalidDefinition If the class has invalid dependencies.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws ReflectionException If reflection fails.
      *
      * @return object The fully constructed object instance.
@@ -289,7 +290,7 @@ class ReflectionFactory
         $resolveDependencies = $this->resolveDependencies($mergeDependencies);
 
         if ($this->canBeAutowired($class) === false) {
-            throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
+            throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
         return $reflection->newInstanceArgs($resolveDependencies);
@@ -352,7 +353,7 @@ class ReflectionFactory
      * @param array $params Optional explicit parameters to override automatic resolution.
      *
      * @throws InvalidDefinition If the class has invalid dependencies.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws ReflectionException If reflection fails.
      *
      * @return array A tuple containing:
@@ -372,7 +373,7 @@ class ReflectionFactory
 
             $this->reflections[$class] = $reflection;
         } catch (ReflectionException) {
-            throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
+            throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
         $reflectionMethod = match ($reflection->isInternal()) {
@@ -441,7 +442,7 @@ class ReflectionFactory
      * @param array $invokeDefinitions Invoke method configurations.
      *
      * @throws InvalidDefinition If the object is not invokable.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws ReflectionException If reflection fails.
      *
      * @return mixed The result of invoking the object or the object itself.
@@ -512,7 +513,10 @@ class ReflectionFactory
         }
 
         throw new InvalidDefinition(
-            Message::PARAMETER_MISSING->getMessage($name, $reflectionParameter->getDeclaringFunction()->getName()),
+            Exception\Message::PARAMETER_MISSING->getMessage(
+                $name,
+                $reflectionParameter->getDeclaringFunction()->getName(),
+            ),
         );
     }
 
@@ -526,7 +530,7 @@ class ReflectionFactory
      * @param array $dependencies List of dependencies to resolve.
      *
      * @throws InvalidDefinition For unresolvable dependencies.
-     * @throws NotInstantiable For instantiation failures.
+     * @throws Exception\NotInstantiable For instantiation failures.
      *
      * @return array Fully resolved dependencies.
      */
@@ -584,7 +588,7 @@ class ReflectionFactory
 
             try {
                 return $this->container->get($className);
-            } catch (NotInstantiable) {
+            } catch (Exception\NotInstantiable) {
                 continue;
             }
         }
@@ -605,7 +609,7 @@ class ReflectionFactory
      * @param array $params Additional parameters to use in resolution.
      *
      * @throws InvalidDefinition If a parameter cannot be resolved.
-     * @throws NotInstantiable If a class cannot be instantiated.
+     * @throws Exception\NotInstantiable If a class cannot be instantiated.
      *
      * @return array Resolved method arguments.
      */
@@ -687,6 +691,6 @@ class ReflectionFactory
             return;
         }
 
-        throw new InvalidDefinition(Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
+        throw new InvalidDefinition(Exception\Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
     }
 }
