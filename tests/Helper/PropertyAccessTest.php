@@ -51,7 +51,7 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
             'Invalid call: "Setting read-only property: PHPPress\Tests\Helper\Stub\PropertyObject::object."',
         );
 
-        PropertyAccess::set($object, 'object', new \stdClass());
+        PropertyAccess::set($object, 'object', new stdClass());
     }
 
     public function testFailsForSetUnknownProperty(): void
