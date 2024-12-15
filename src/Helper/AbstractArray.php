@@ -8,7 +8,7 @@ use function array_all;
 use function is_string;
 
 /**
- * Provides concrete implementation for [[Arr]].
+ * Provides concrete implementation for {Arr}.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
