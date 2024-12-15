@@ -45,7 +45,7 @@ final class ConfigureTest extends \PHPUnit\Framework\TestCase
                 'property' => 'value',
                 'setMethod()' => ['param1', 'param2'],
                 'withImmutableProperty()' => [2],
-            ]
+            ],
         );
 
         $this->assertSame('param1param2', $objectConfigure->property);
