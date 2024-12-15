@@ -6,12 +6,10 @@ namespace PHPPress\Helper;
 
 use PHPPress\Exception\{InvalidCall, UnknownProperty};
 use PHPPress\Helper\Exception\Message;
-use ReflectionObject;
 
-use function array_key_exists;
 use function is_subclass_of;
-use function spl_object_hash;
-use function strtolower;
+use function method_exists;
+use function property_exists;
 
 /**
  * Provides concrete implementation for [[PropertyAccess]].
@@ -21,17 +19,6 @@ use function strtolower;
  */
 abstract class AbstractPropertyAccess
 {
-    /**
-     * @var array Cached ReflectionObject instances.
-     */
-    private static array $reflectionCache = [];
-    /**
-     * @var array Cached method existence to improve performance.
-     *
-     * @phpstant-var array<string, bool>
-     */
-    private static array $methodCache = [];
-
     /**
      * Returns the value of an object property.
      *
@@ -72,13 +59,7 @@ abstract class AbstractPropertyAccess
      */
     public static function hasMethod(object $object, string $name): bool
     {
-        $cacheKey = spl_object_hash($object) . '::' . strtolower($name);
-
-        if (array_key_exists($cacheKey, self::$methodCache)) {
-            return self::$methodCache[$cacheKey];
-        }
-
-        return self::$methodCache[$cacheKey] = self::getReflection($object)->hasMethod($name);
+        return method_exists($object, $name);
     }
 
     /**
@@ -139,11 +120,10 @@ abstract class AbstractPropertyAccess
     public static function isReadable(object $object, string $name, bool $stricMode = true): bool
     {
         $getter = "get{$name}";
-        $reflection = self::getReflection($object);
 
         return $stricMode === false
             ? static::hasMethod($object, $getter)
-            : $reflection->hasProperty($name) && static::hasMethod($object, $getter);
+            : self::propertyExists($object, $name) && static::hasMethod($object, $getter);
     }
 
     /**
@@ -165,11 +145,10 @@ abstract class AbstractPropertyAccess
     public static function isWritable(object $object, string $name, bool $stricMode = true): bool
     {
         $setter = "set{$name}";
-        $reflection = self::getReflection($object);
 
         return $stricMode === false
             ? static::hasMethod($object, $setter)
-            : $reflection->hasProperty($name) && static::hasMethod($object, $setter);
+            : self::propertyExists($object, $name) && static::hasMethod($object, $setter);
     }
 
     /**
@@ -217,20 +196,15 @@ abstract class AbstractPropertyAccess
     }
 
     /**
-     * Cached method for getting or creating ReflectionObject.
+     * Checks if a property exists in an object.
      *
-     * @param object $object The object to get the reflection for.
+     * @param object $object The object to check.
+     * @param string $name The property name.
      *
-     * @return ReflectionObject The reflection object.
+     * @return bool Whether the property exists.
      */
-    private static function getReflection(object $object): ReflectionObject
+    private static function propertyExists(object $object, string $name): bool
     {
-        $cacheKey = spl_object_hash($object);
-
-        if (array_key_exists($cacheKey, self::$reflectionCache)) {
-            return self::$reflectionCache[$cacheKey];
-        }
-
-        return self::$reflectionCache[$cacheKey] = new ReflectionObject($object);
+        return property_exists($object, $name);
     }
 }
