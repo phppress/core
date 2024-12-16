@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 
 /**
- * Test case for the InvalidCall class.
+ * Test case for the {@see InvalidCall} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
