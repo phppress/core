@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Provider;
 
-use PHPPress\Tests\Di\Stub\{ClassInterface, EngineInterface, EngineMarkOne, EngineStorage};
+use PHPPress\Tests\Di\Stub\{InstanceInterface, EngineInterface, EngineMarkOne, EngineStorage};
 
 /**
  * Provider for the Container class.
@@ -23,7 +23,7 @@ final class ContainerProvider
     {
         return [
             [false, 'non_existing'],
-            [false, ClassInterface::class],
+            [false, InstanceInterface::class],
             [true, EngineInterface::class],
             [true, EngineMarkOne::class],
             [true, EngineStorage::class],
