@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Factory;
+namespace PHPPress\Di\Definition;
 
 use PHPPress\Exception\InvalidArgument;
 
@@ -30,7 +30,7 @@ readonly class Instance
     final public function __construct(public readonly string $id)
     {
         if ($id === '') {
-            throw new InvalidArgument(Exception\Message::COMPONENT_ID_EMPTY->getMessage());
+            throw new InvalidArgument('The required component "id" is empty.');
         }
     }
 

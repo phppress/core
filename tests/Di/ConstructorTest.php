@@ -7,8 +7,8 @@ namespace PHPPress\Tests\Di;
 use ArrayIterator;
 use DateTime;
 use PHPPress\Di\Container;
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\{InvalidArgument, InvalidDefinition};
-use PHPPress\Factory\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
 /**

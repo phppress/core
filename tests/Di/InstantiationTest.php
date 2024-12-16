@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Di;
 
 use PHPPress\Di\Container;
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\InvalidDefinition;
 use PHPPress\Factory\Exception\NotInstantiable;
-use PHPPress\Factory\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
 /**

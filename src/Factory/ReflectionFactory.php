@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Factory;
 
 use Closure;
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\InvalidDefinition;
 use PHPPress\Helper\Arr;
 use Psr\Container\ContainerInterface;

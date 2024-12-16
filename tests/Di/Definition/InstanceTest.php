@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Tests\Factory;
+namespace PHPPress\Tests\Di\Definition;
 
 use PHPPress\Exception\InvalidArgument;
-use PHPPress\Factory\Instance;
+use PHPPress\Di\Definition\Instance;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
