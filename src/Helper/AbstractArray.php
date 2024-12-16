@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace PHPPress\Helper;
 
 use function array_all;
+use function array_is_list;
 use function is_string;
 
 /**
- * Provides concrete implementation for {Arr}.
+ * Provides concrete implementation for {@see Arr}.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}

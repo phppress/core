@@ -9,7 +9,7 @@ use PHPPress\Tests\Provider\ArrProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
 
 /**
- * Test case for the Arr class.
+ * Test case for the {@see Arr} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
