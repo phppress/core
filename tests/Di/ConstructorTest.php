@@ -12,7 +12,7 @@ use PHPPress\Exception\{InvalidArgument, InvalidDefinition};
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test case for the Container class.
+ * Test case for the {@see Container} class with constructor arguments.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -37,7 +37,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorBuiltInPHPClass::class => [
-                    '__construct()' => [$dateTime],
+                    '__construct()' => [
+                        $dateTime,
+                    ],
                 ],
             ],
         );
@@ -55,7 +57,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorBuiltInPHPClass::class => [
-                    '__construct()' => ['dateTime' => $dateTime],
+                    '__construct()' => [
+                        'dateTime' => $dateTime,
+                    ],
                 ],
             ],
         );
@@ -73,7 +77,11 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
 
         $container = $this->createContainer(
             [
-                Stub\ConstructorBuiltInPHPClassOptional::class => ['__construct()' => [$arrayIterator]],
+                Stub\ConstructorBuiltInPHPClassOptional::class => [
+                    '__construct()' => [
+                        $arrayIterator,
+                    ],
+                ],
             ],
         );
 
@@ -98,7 +106,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\Constructor::class => [
-                    '__construct()' => [new Stub\Instance()],
+                    '__construct()' => [
+                        new Stub\Instance(),
+                    ],
                 ],
             ],
         );
@@ -117,7 +127,15 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorCompundType::class,
-                    '__construct()' => [[1, 2, 3], $callable, $object],
+                    '__construct()' => [
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
+                        $callable,
+                        $object,
+                    ],
                 ],
             ],
         );
@@ -137,7 +155,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'instance-interface' => Stub\Instance::class,
                 'instance' => [
                     '__class' => Stub\Constructor::class,
-                    '__construct()' => [Instance::of('instance-interface')],
+                    '__construct()' => [
+                        Instance::of('instance-interface'),
+                    ],
                 ],
             ],
         );
@@ -153,7 +173,12 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorScalarType::class => [
-                    '__construct()' => [true, 1, 2.3, 'scalar'],
+                    '__construct()' => [
+                        true,
+                        1,
+                        2.3,
+                        'scalar',
+                    ],
                 ],
             ],
         );
@@ -172,7 +197,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\Constructor::class => [
-                    '__construct()' => ['instance' => new Stub\Instance()],
+                    '__construct()' => [
+                        'instance' => new Stub\Instance(),
+                    ],
                 ],
             ],
         );
@@ -191,7 +218,15 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorCompundType::class,
-                    '__construct()' => ['array' => [1, 2, 3], 'callable' => $callable, 'object' => $object],
+                    '__construct()' => [
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
+                        'callable' => $callable,
+                        'object' => $object,
+                    ],
                 ],
             ],
         );
@@ -211,7 +246,9 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'instance-interface' => Stub\Instance::class,
                 'instance' => [
                     '__class' => Stub\Constructor::class,
-                    '__construct()' => ['instance' => Instance::of('instance-interface')],
+                    '__construct()' => [
+                        'instance' => Instance::of('instance-interface'),
+                    ],
                 ],
             ],
         );
@@ -227,7 +264,12 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorScalarType::class => [
-                    '__construct()' => ['bool' => true, 'int' => 1, 'float' => 2.3, 'string' => 'scalar'],
+                    '__construct()' => [
+                        'bool' => true,
+                        'int' => 1,
+                        'float' => 2.3,
+                        'string' => 'scalar',
+                    ],
                 ],
             ],
         );
@@ -245,7 +287,11 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
     {
         $container = $this->createContainer(
             [
-                Stub\Constructor::class => ['__construct()' => [new \stdClass()]],
+                Stub\Constructor::class => [
+                    '__construct()' => [
+                        new \stdClass(),
+                    ],
+                ],
             ],
         );
 
@@ -266,7 +312,11 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\ConstructorSeveralArguments::class => [
                     '__construct()' => [
-                        [1, 2, 3],
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
                         'callable' => $callable,
                         'object' => $object,
                         'string' => 'FailsInvalidArgumentsFormat',
@@ -351,7 +401,10 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorDefaultValue::class => [
-                    '__construct()' => ['class' => 'Indexed Parameters', 'engine' => new Stub\EngineMarkOne()],
+                    '__construct()' => [
+                        'class' => 'Indexed Parameters',
+                        'engine' => new Stub\EngineMarkOne(),
+                    ],
                 ],
             ],
         );
@@ -370,7 +423,10 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorDefaultValue::class => [
-                    '__construct()' => ['class' => 'Named Parameters', 'engine' => new Stub\EngineMarkOne()],
+                    '__construct()' => [
+                        'class' => 'Named Parameters',
+                        'engine' => new Stub\EngineMarkOne(),
+                    ],
                 ],
             ],
         );
@@ -389,7 +445,10 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorDefaultValue::class => [
-                    '__construct()' => ['engine' => new Stub\EngineMarkOne(), 'class' => 'Named Parameters'],
+                    '__construct()' => [
+                        'engine' => new Stub\EngineMarkOne(),
+                        'class' => 'Named Parameters',
+                    ],
                 ],
             ],
         );
@@ -436,7 +495,10 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorVariadic::class => [
-                    '__construct()' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                    '__construct()' => [
+                        new Stub\EngineMarkOne(),
+                        new Stub\EngineMarkTwo(),
+                    ],
                 ],
             ],
         );
@@ -456,7 +518,15 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicCompundType::class,
-                    '__construct()' => [[false, true], $callable, $object, null],
+                    '__construct()' => [
+                        [
+                            false,
+                            true,
+                        ],
+                        $callable,
+                        $object,
+                        null,
+                    ],
                 ],
             ],
         );
@@ -478,7 +548,10 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'engine-two' => Stub\EngineMarkTwo::class,
                 'instance' => [
                     '__class' => Stub\ConstructorVariadic::class,
-                    '__construct()' => [Instance::of('engine-one'), Instance::of('engine-two')],
+                    '__construct()' => [
+                        Instance::of('engine-one'),
+                        Instance::of('engine-two'),
+                    ],
                 ],
             ],
         );
@@ -495,7 +568,12 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicScalarType::class,
-                    '__construct()' => [false, 100, 2.30, 'variadic'],
+                    '__construct()' => [
+                        false,
+                        100,
+                        2.30,
+                        'variadic',
+                    ],
                 ],
             ],
         );
@@ -518,7 +596,11 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicSeveralArguments::class,
                     '__construct()' => [
-                        [1, 2, 3],
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
                         $object,
                         'InvokeableVariadicSeveralArguments',
                         new Stub\EngineMarkOne(),
@@ -533,10 +615,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorVariadicSeveralArguments::class, $instance);
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance->getConstructorArguments(),
         );
@@ -546,7 +635,14 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
     {
         $container = $this->createContainer(
             [
-                Stub\ConstructorVariadicWithoutTypeHint::class => ['__construct()' => [1, 'variadic', 2.3, true]],
+                Stub\ConstructorVariadicWithoutTypeHint::class => [
+                    '__construct()' => [
+                        1,
+                        'variadic',
+                        2.3,
+                        true,
+                    ],
+                ],
             ],
         );
 
@@ -561,7 +657,12 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorVariadic::class => [
-                    '__construct()' => ['variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()]],
+                    '__construct()' => [
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
+                    ],
                 ],
             ],
         );
@@ -580,7 +681,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicCompundType::class,
-                    '__construct()' => ['variadic' => [[false, true], $callable, $object, null]],
+                    '__construct()' => [
+                        'variadic' => [
+                            [
+                                false,
+                                true,
+                            ],
+                            $callable,
+                            $object,
+                            null,
+                        ],
+                    ],
                 ],
             ],
         );
@@ -602,7 +713,12 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'engine-two' => Stub\EngineMarkTwo::class,
                 'instance' => [
                     '__class' => Stub\ConstructorVariadic::class,
-                    '__construct()' => ['variadic' => [Instance::of('engine-one'), Instance::of('engine-two')]],
+                    '__construct()' => [
+                        'variadic' => [
+                            Instance::of('engine-one'),
+                            Instance::of('engine-two'),
+                        ],
+                    ],
                 ],
             ],
         );
@@ -619,7 +735,14 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicScalarType::class,
-                    '__construct()' => ['variadic' => [false, 100, 2.30, 'variadic']],
+                    '__construct()' => [
+                        'variadic' => [
+                            false,
+                            100,
+                            2.30,
+                            'variadic',
+                        ],
+                    ],
                 ],
             ],
         );
@@ -642,10 +765,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicSeveralArguments::class,
                     '__construct()' => [
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -656,10 +786,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorVariadicSeveralArguments::class, $instance);
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance->getConstructorArguments(),
         );
@@ -674,10 +811,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\ConstructorVariadicSeveralArguments::class,
                     '__construct()' => [
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                     ],
                 ],
             ],
@@ -688,10 +832,17 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorVariadicSeveralArguments::class, $instance);
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance->getConstructorArguments(),
         );
@@ -702,7 +853,14 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\ConstructorVariadicWithoutTypeHint::class => [
-                    '__construct()' => ['variadic' => [1, 'variadic', 2.3, true]],
+                    '__construct()' => [
+                        'variadic' => [
+                            1,
+                            'variadic',
+                            2.3,
+                            true,
+                        ],
+                    ],
                 ],
             ],
         );

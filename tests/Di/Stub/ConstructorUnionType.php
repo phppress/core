@@ -26,6 +26,9 @@ final class ConstructorUnionType
             default => null,
         };
 
-        return ['color' => $color, 'engine' => $engine];
+        return [
+            'color' => $color,
+            'engine' => $engine,
+        ];
     }
 }

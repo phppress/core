@@ -21,6 +21,8 @@ final class ConstructorVariadicCompundType
 
     public function getConstructorArguments(): array
     {
-        return ['variadic' => $this->variadic];
+        return [
+            'variadic' => $this->variadic,
+        ];
     }
 }

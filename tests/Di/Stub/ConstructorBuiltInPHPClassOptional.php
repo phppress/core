@@ -23,6 +23,8 @@ final class ConstructorBuiltInPHPClassOptional
 
     public function getConstructorArguments(): array
     {
-        return ['iterator' => $this->iterator];
+        return [
+            'iterator' => $this->iterator,
+        ];
     }
 }

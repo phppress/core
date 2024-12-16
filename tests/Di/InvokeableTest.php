@@ -13,16 +13,16 @@ use PHPUnit\Framework\Attributes\Group;
 use Psr\Container\ContainerInterface;
 
 /**
- * Test cases for invokeable class handling in the dependency injection container.
+ * Test case for the {@see Container} class for invokeable class handling in the dependency injection.
  *
  * Tests container's capabilities for:
  * - Auto-wiring invokeable classes
- * - Handling various parameter types (scalar, compound, union, intersection).
- * - Processing named and indexed parameters.
- * - Managing variadic arguments.
  * - Handling default values.
- * - Validating parameter types and requirements.
+ * - Handling various parameter types (scalar, compound, union, intersection).
+ * - Managing variadic arguments.
+ * - Processing named and indexed parameters.
  * - Supporting singleton and definition-based instantiation.
+ * - Validating parameter types and requirements.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -77,7 +77,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\InvokeableBuiltInPHPClass::class => [
-                    '__invoke()' => [$dateTime],
+                    '__invoke()' => [
+                        $dateTime,
+                    ],
                 ],
             ],
         );
@@ -95,7 +97,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\InvokeableBuiltInPHPClass::class => [
-                    '__invoke()' => ['dateTime' => $dateTime],
+                    '__invoke()' => [
+                        'dateTime' => $dateTime,
+                    ],
                 ],
             ],
         );
@@ -113,7 +117,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $container = $this->createContainer(
             [
-                Stub\InvokeableBuiltInPHPClassOptional::class => ['__invoke()' => [$arrayIterator]],
+                Stub\InvokeableBuiltInPHPClassOptional::class => [
+                    '__invoke()' => [
+                        $arrayIterator,
+                    ],
+                ],
             ],
         );
 
@@ -166,7 +174,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
     {
         $container = $this->createContainer(
             [
-                'instance' => [Stub\InstanceFactory::class, 'create'],
+                'instance' => [
+                    Stub\InstanceFactory::class,
+                    'create',
+                ],
             ],
         );
 
@@ -180,7 +191,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
     {
         $container = $this->createContainer(
             [
-                'instance' => [new Stub\InvokeablePSRContainer(), '__invoke'],
+                'instance' => [
+                    new Stub\InvokeablePSRContainer(),
+                    '__invoke',
+                ],
             ],
         );
 
@@ -259,7 +273,15 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableCompundType::class,
-                    '__invoke()' => [[1, 2, 3], $callable, $object],
+                    '__invoke()' => [
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
+                        $callable,
+                        $object,
+                    ],
                 ],
             ],
         );
@@ -294,7 +316,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableScalarType::class,
-                    '__invoke()' => [false, 100, 2.30, 'scalar'],
+                    '__invoke()' => [
+                        false,
+                        100,
+                        2.30,
+                        'scalar',
+                    ],
                 ],
             ],
         );
@@ -314,7 +341,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableSeveralArguments::class,
                     '__invoke()' => [
-                        [1, 2, 3],
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
                         $callable,
                         $object,
                         'InvokeableVariadicSeveralArguments',
@@ -328,7 +359,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
@@ -344,7 +379,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableWithoutTypeHint::class,
-                    '__invoke()' => [42],
+                    '__invoke()' => [
+                        42,
+                    ],
                 ],
             ],
         );
@@ -381,7 +418,15 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableCompundType::class,
-                    '__invoke()' => ['array' => [1, 2, 3], 'callable' => $callable, 'object' => $object],
+                    '__invoke()' => [
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
+                        'callable' => $callable,
+                        'object' => $object,
+                    ],
                 ],
             ],
         );
@@ -416,7 +461,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableScalarType::class,
-                    '__invoke()' => ['bool' => false, 'int' => 100, 'float' => 2.30, 'string' => 'scalar'],
+                    '__invoke()' => [
+                        'bool' => false,
+                        'int' => 100,
+                        'float' => 2.30,
+                        'string' => 'scalar',
+                    ],
                 ],
             ],
         );
@@ -436,7 +486,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableSeveralArguments::class,
                     '__invoke()' => [
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'callable' => $callable,
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
@@ -450,7 +504,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
@@ -472,7 +530,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                     '__invoke()' => [
                         'engine' => new Stub\EngineMarkTwo(),
                         'callable' => $callable,
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
                     ],
@@ -484,7 +546,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
@@ -500,7 +566,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableWithoutTypeHint::class,
-                    '__invoke()' => ['value' => 42],
+                    '__invoke()' => [
+                        'value' => 42,
+                    ],
                 ],
             ],
         );
@@ -519,7 +587,7 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->expectException(InvalidDefinition::class);
-        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():517}"."');
+        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():585}"."');
 
         $container->get('instance');
     }
@@ -530,7 +598,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\Invokeable::class,
-                    '__invoke()' => [42],
+                    '__invoke()' => [
+                        42,
+                    ],
                 ],
             ],
         );
@@ -549,7 +619,11 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\InvokeableSeveralArguments::class => [
                     '__invoke()' => [
-                        [1, 2, 3],
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
                         'callable' => static fn(): string => 'callable',
                         'object' => new \stdClass(),
                         'engine' => new Stub\EngineMarkOne(),
@@ -620,7 +694,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\EngineInterface::class => [
                     '__class' => Stub\EngineMarkTwo::class,
-                    'setColor()' => ['blue'],
+                    'setColor()' => [
+                        'blue',
+                    ],
                 ],
             ],
         );
@@ -637,7 +713,9 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             singletons: [
                 Stub\EngineInterface::class => [
                     '__class' => Stub\EngineMarkTwo::class,
-                    'setColor()' => ['blue'],
+                    'setColor()' => [
+                        'blue',
+                    ],
                 ],
             ],
         );
@@ -794,7 +872,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadic::class,
                     '__invoke()' => [
-                        [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -814,7 +895,17 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicCompundType::class,
-                    '__invoke()' => [[[false, true], $object, $callable, null]],
+                    '__invoke()' => [
+                        [
+                            [
+                                false,
+                                true,
+                            ],
+                            $object,
+                            $callable,
+                            null,
+                        ],
+                    ],
                 ],
             ],
         );
@@ -832,7 +923,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'engine-two' => Stub\EngineMarkTwo::class,
                 'instance' => [
                     '__class' => Stub\InvokeableVariadic::class,
-                    '__invoke()' => [[Instance::of('engine-one'), Instance::of('engine-two')]],
+                    '__invoke()' => [
+                        [
+                            Instance::of('engine-one'),
+                            Instance::of('engine-two'),
+                        ],
+                    ],
                 ],
             ],
         );
@@ -848,7 +944,14 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicScalarType::class,
-                    '__invoke()' => [[false, 100, 2.30, 'variadic']],
+                    '__invoke()' => [
+                        [
+                            false,
+                            100,
+                            2.30,
+                            'variadic',
+                        ],
+                    ],
                 ],
             ],
         );
@@ -868,11 +971,18 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicSeveralArguments::class,
                     '__invoke()' => [
-                        [1, 2, 3],
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
                         $callable,
                         $object,
                         'InvokeableVariadicSeveralArguments',
-                        [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -882,11 +992,18 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance,
         );
@@ -899,7 +1016,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicWithoutTypeHint::class,
                     '__invoke()' => [
-                        [false, 100, 2.30, 'variadic'],
+                        [
+                            false,
+                            100,
+                            2.30,
+                            'variadic',
+                        ],
                     ],
                 ],
             ],
@@ -917,7 +1039,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadic::class,
                     '__invoke()' => [
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -938,7 +1063,15 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicCompundType::class,
                     '__invoke()' => [
-                        'variadic' => [[false, true], $object, $callable, null],
+                        'variadic' => [
+                            [
+                                false,
+                                true,
+                            ],
+                            $object,
+                            $callable,
+                            null,
+                        ],
                     ],
                 ],
             ],
@@ -949,7 +1082,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'variadic' => [
-                    [false, true],
+                    [
+                        false,
+                        true,
+                    ],
                     $object,
                     $callable,
                     null,
@@ -966,7 +1102,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicDefaultValue::class,
                     '__invoke()' => [
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -977,7 +1116,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'class' => 'InvokeableVariadicDefaultValue',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance,
         );
@@ -992,7 +1134,10 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadic::class,
                     '__invoke()' => [
-                        'variadic' => [Instance::of('engine-one'), Instance::of('engine-two')],
+                        'variadic' => [
+                            Instance::of('engine-one'),
+                            Instance::of('engine-two'),
+                        ],
                     ],
                 ],
             ],
@@ -1010,7 +1155,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicScalarType::class,
                     '__invoke()' => [
-                        'variadic' => [false, 100, 2.30, 'variadic'],
+                        'variadic' => [
+                            false,
+                            100,
+                            2.30,
+                            'variadic',
+                        ],
                     ],
                 ],
             ],
@@ -1031,11 +1181,18 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicSeveralArguments::class,
                     '__invoke()' => [
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'callable' => $callable,
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -1045,11 +1202,18 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance,
         );
@@ -1065,9 +1229,16 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicSeveralArguments::class,
                     '__invoke()' => [
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                         'callable' => $callable,
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'object' => $object,
                         'string' => 'InvokeableVariadicSeveralArguments',
                     ],
@@ -1079,11 +1250,18 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(
             [
-                'array' => [1, 2, 3],
+                'array' => [
+                    1,
+                    2,
+                    3,
+                ],
                 'callable' => $callable,
                 'object' => $object,
                 'string' => 'InvokeableVariadicSeveralArguments',
-                'variadic' => ['Mark One', 'Mark Two'],
+                'variadic' => [
+                    'Mark One',
+                    'Mark Two',
+                ],
             ],
             $instance,
         );
@@ -1096,7 +1274,12 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InvokeableVariadicWithoutTypeHint::class,
                     '__invoke()' => [
-                        'variadic' => [false, 100, 2.30, 'variadic'],
+                        'variadic' => [
+                            false,
+                            100,
+                            2.30,
+                            'variadic',
+                        ],
                     ],
                 ],
             ],

@@ -11,15 +11,15 @@ use PHPPress\Factory\Exception\NotInstantiable;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test cases for dependency injection container instantiation functionality.
+ * Test case for the {@see Container} class for dependency injection instantiation functionality.
  *
  * Verifies container's ability to:
  * - Auto-wire dependencies.
  * - Handle class aliases.
- * - Process interface bindings.
- * - Manage singletons.
  * - Handle method/property definitions.
+ * - Manage singletons.
  * - Process callable definitions.
+ * - Process interface bindings.
  * - Validate class existence and definition format.
  *
  * @copyright Copyright (C) 2024 PHPPress.
@@ -86,7 +86,11 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 'instance' => Stub\Instance::class,
-                Stub\Instance::class => ['setA()' => [42]],
+                Stub\Instance::class => [
+                    'setA()' => [
+                        42,
+                    ],
+                ],
             ],
         );
 
@@ -107,9 +111,34 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\InstanceMethodSeveralArguments::class => [
-                    'compoundTypes()' => [[1, 2, 3], $callable, [4, 5, 6], $object],
-                    'commonArguments()' => [[7, 8, 9], $objectCommon],
-                    'scalarTypes()' => [true, 3.14, 42, 'scalar'],
+                    'compoundTypes()' => [
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
+                        $callable,
+                        [
+                            4,
+                            5,
+                            6,
+                        ],
+                        $object,
+                    ],
+                    'commonArguments()' => [
+                        [
+                            7,
+                            8,
+                            9,
+                        ],
+                        $objectCommon,
+                    ],
+                    'scalarTypes()' => [
+                        true,
+                        3.14,
+                        42,
+                        'scalar',
+                    ],
                 ],
             ],
         );
@@ -119,9 +148,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compoundTypes' => [
-                    'array' => [1, 2, 3],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
                     'callable' => $callable,
-                    'iterable' => [4, 5, 6],
+                    'iterable' => [
+                        4,
+                        5,
+                        6,
+                    ],
                     'object' => $object,
                 ],
                 'scalarTypes' => [
@@ -136,7 +173,11 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'common' => [
-                    'array' => [7, 8, 9],
+                    'array' => [
+                        7,
+                        8,
+                        9,
+                    ],
                     'object' => $objectCommon,
                 ],
             ],
@@ -156,13 +197,25 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 Stub\InstanceMethodSeveralArguments::class => [
                     'compoundTypes()' => [
-                        'array' => [1, 2, 3],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                         'callable' => $callable,
-                        'iterable' => [4, 5, 6],
+                        'iterable' => [
+                            4,
+                            5,
+                            6,
+                        ],
                         'object' => $object,
                     ],
                     'commonArguments()' => [
-                        'array' => [7, 8, 9],
+                        'array' => [
+                            7,
+                            8,
+                            9,
+                        ],
                         'object' => $objectCommon,
                     ],
                     'scalarTypes()' => [
@@ -180,9 +233,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compoundTypes' => [
-                    'array' => [1, 2, 3],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
                     'callable' => $callable,
-                    'iterable' => [4, 5, 6],
+                    'iterable' => [
+                        4,
+                        5,
+                        6,
+                    ],
                     'object' => $object,
                 ],
                 'scalarTypes' => [
@@ -197,7 +258,11 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'common' => [
-                    'array' => [7, 8, 9],
+                    'array' => [
+                        7,
+                        8,
+                        9,
+                    ],
                     'object' => $objectCommon,
                 ],
             ],
@@ -219,12 +284,24 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                     'compoundTypes()' => [
                         'callable' => $callable,
                         'object' => $object,
-                        'array' => [1, 2, 3],
-                        'iterable' => [4, 5, 6],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
+                        'iterable' => [
+                            4,
+                            5,
+                            6,
+                        ],
                     ],
                     'commonArguments()' => [
                         'object' => $objectCommon,
-                        'array' => [7, 8, 9],
+                        'array' => [
+                            7,
+                            8,
+                            9,
+                        ],
                     ],
                     'scalarTypes()' => [
                         'string' => 'scalar',
@@ -241,9 +318,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compoundTypes' => [
-                    'array' => [1, 2, 3],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
                     'callable' => $callable,
-                    'iterable' => [4, 5, 6],
+                    'iterable' => [
+                        4,
+                        5,
+                        6,
+                    ],
                     'object' => $object,
                 ],
                 'scalarTypes' => [
@@ -258,7 +343,11 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'common' => [
-                    'array' => [7, 8, 9],
+                    'array' => [
+                        7,
+                        8,
+                        9,
+                    ],
                     'object' => $objectCommon,
                 ],
             ],
@@ -271,8 +360,12 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\Instance::class => [
-                    'setA()' => [42],
-                    'setB()' => [142],
+                    'setA()' => [
+                        42,
+                    ],
+                    'setB()' => [
+                        142,
+                    ],
                     'c' => 242,
                 ],
             ],
@@ -292,7 +385,9 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodPrivate::class,
-                    'privateMethod()' => ['invalid'],
+                    'privateMethod()' => [
+                        'invalid',
+                    ],
                 ],
             ],
         );
@@ -311,7 +406,9 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodPrivate::class,
-                    'noExist()' => ['invalid'],
+                    'noExist()' => [
+                        'invalid',
+                    ],
                 ],
             ],
         );
@@ -361,7 +458,9 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
 
         $this->createContainer(
             [
-                'instance' => ['invalid'],
+                'instance' => [
+                    'invalid',
+                ],
             ],
         );
     }
@@ -407,7 +506,9 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 Stub\Instance::class => [
-                    'withD()' => [1000],
+                    'withD()' => [
+                        1000,
+                    ],
                 ],
             ],
         );
@@ -452,9 +553,16 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                     '__clone()' => [],
                     '__debugInfo()' => [],
                     '__destruct()' => [],
-                    '__get()' => ['name'],
-                    '__isset()' => ['name'],
-                    '__set()' => ['name', 'Magic Method'],
+                    '__get()' => [
+                        'name',
+                    ],
+                    '__isset()' => [
+                        'name',
+                    ],
+                    '__set()' => [
+                        'name',
+                        'Magic Method',
+                    ],
                     '__toString()' => [],
                     '__wakeup()' => [],
                 ],
@@ -497,7 +605,12 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadic()' => [[new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()]],
+                    'variadic()' => [
+                        [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
+                    ],
                 ],
             ],
         );
@@ -514,7 +627,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadicCompundTypes()' => [[1, 2, 3], [new Stub\EngineMarkTwo(), null]],
+                    'variadicCompundTypes()' => [
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
+                        [
+                            new Stub\EngineMarkTwo(),
+                            null,
+                        ],
+                    ],
                 ],
             ],
         );
@@ -525,8 +648,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compundTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => ['red', null],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        'red',
+                        null,
+                    ],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
@@ -539,7 +669,19 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadicScalarTypes()' => [[1, 2, 3], [true, 1, 3.14, 'scalar']],
+                    'variadicScalarTypes()' => [
+                        [
+                            1,
+                            2,
+                            3,
+                        ],
+                        [
+                            true,
+                            1,
+                            3.14,
+                            'scalar',
+                        ],
+                    ],
                 ],
             ],
         );
@@ -550,8 +692,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'scalarTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => [true, 1, 3.14, 'scalar'],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        true,
+                        1,
+                        3.14,
+                        'scalar',
+                    ],
                 ],
             ],
             $instance->getVariadicScalarTypes(),
@@ -564,7 +715,12 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadic()' => ['variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()]],
+                    'variadic()' => [
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
+                    ],
                 ],
             ],
         );
@@ -582,8 +738,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
                     'variadicCompundTypes()' => [
-                        'array' => [1, 2, 3],
-                        'variadic' => [new Stub\EngineMarkTwo(), null],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
+                        'variadic' => [
+                            new Stub\EngineMarkTwo(),
+                            null,
+                        ],
                     ],
                 ],
             ],
@@ -595,8 +758,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compundTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => ['red', null],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        'red',
+                        null,
+                    ],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
@@ -610,8 +780,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
                     'variadicScalarTypes()' => [
-                        'array' => [1, 2, 3],
-                        'variadic' => [true, 1, 3.14, 'scalar'],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
+                        'variadic' => [
+                            true,
+                            1,
+                            3.14,
+                            'scalar',
+                        ],
                     ],
                 ],
             ],
@@ -623,8 +802,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'scalarTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => [true, 1, 3.14, 'scalar'],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        true,
+                        1,
+                        3.14,
+                        'scalar',
+                    ],
                 ],
             ],
             $instance->getVariadicScalarTypes(),
@@ -638,8 +826,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
                     'variadicCompundTypes()' => [
-                        'variadic' => [new Stub\EngineMarkTwo(), null],
-                        'array' => [1, 2, 3],
+                        'variadic' => [
+                            new Stub\EngineMarkTwo(),
+                            null,
+                        ],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                     ],
                 ],
             ],
@@ -651,8 +846,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'compundTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => ['red', null],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        'red',
+                        null,
+                    ],
                 ],
             ],
             $instance->getVariadicCompundTypes(),
@@ -666,7 +868,10 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
                     'variadicOptional()' => [
-                        'variadic' => [new Stub\EngineMarkOne(), new Stub\EngineMarkTwo()],
+                        'variadic' => [
+                            new Stub\EngineMarkOne(),
+                            new Stub\EngineMarkTwo(),
+                        ],
                     ],
                 ],
             ],
@@ -678,8 +883,15 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'optional' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => ['Mark One', 'Mark Two'],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        'Mark One',
+                        'Mark Two',
+                    ],
                 ],
             ],
             $instance->getVariadicOptional(),
@@ -693,8 +905,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
                     'variadicScalarTypes()' => [
-                        'variadic' => [true, 1, 3.14, 'scalar'],
-                        'array' => [1, 2, 3],
+                        'variadic' => [
+                            true,
+                            1,
+                            3.14,
+                            'scalar',
+                        ],
+                        'array' => [
+                            1,
+                            2,
+                            3,
+                        ],
                     ],
                 ],
             ],
@@ -706,8 +927,17 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             [
                 'scalarTypes' => [
-                    'array' => [1, 2, 3],
-                    'variadic' => [true, 1, 3.14, 'scalar'],
+                    'array' => [
+                        1,
+                        2,
+                        3,
+                    ],
+                    'variadic' => [
+                        true,
+                        1,
+                        3.14,
+                        'scalar',
+                    ],
                 ],
             ],
             $instance->getVariadicScalarTypes(),
