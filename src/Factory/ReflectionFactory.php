@@ -127,8 +127,8 @@ class ReflectionFactory
      * );
      * ```
      *
-     * @throws InvalidDefinition If dependency definition is incorrect.
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If dependency definition is incorrect.
      * @throws ReflectionException If reflection fails.
      *
      * @return mixed The fully constructed and configured object instance.
@@ -244,8 +244,8 @@ class ReflectionFactory
      * @param string $method The method to call.
      * @param array $definitions Method call configurations and parameters.
      *
-     * @throws InvalidDefinition If the method is not accessible or not found.
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the method is not accessible or not found.
      * @throws ReflectionException If reflection fails.
      *
      * @return object Configured object.
@@ -276,8 +276,8 @@ class ReflectionFactory
      * @param string $class The class to instantiate.
      * @param array $constructorParams Constructor parameters.
      *
-     * @throws InvalidDefinition If the class has invalid dependencies.
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the class has invalid dependencies.
      * @throws ReflectionException If reflection fails.
      *
      * @return object The fully constructed object instance.
@@ -353,8 +353,8 @@ class ReflectionFactory
      * @param string $class The fully qualified class name to inspect.
      * @param array $params Optional explicit parameters to override automatic resolution.
      *
-     * @throws InvalidDefinition If the class has invalid dependencies.
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the class has invalid dependencies.
      * @throws ReflectionException If reflection fails.
      *
      * @return array A tuple containing:
@@ -442,8 +442,8 @@ class ReflectionFactory
      * @param object $object The object to potentially invoke.
      * @param array $invokeDefinitions Invoke method configurations.
      *
-     * @throws InvalidDefinition If the object is not invokable.
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the object is not invokable.
      * @throws ReflectionException If reflection fails.
      *
      * @return mixed The result of invoking the object or the object itself.
@@ -530,8 +530,8 @@ class ReflectionFactory
      *
      * @param array $dependencies List of dependencies to resolve.
      *
-     * @throws InvalidDefinition For unresolvable dependencies.
      * @throws Exception\NotInstantiable For instantiation failures.
+     * @throws InvalidDefinition For unresolvable dependencies.
      *
      * @return array Fully resolved dependencies.
      */
@@ -552,10 +552,10 @@ class ReflectionFactory
      * Resolves a single dependency for a method or function parameter.
      *
      * Comprehensive resolution strategy:
-     * - Check for explicitly provided parameter.
-     * - Use default value if available.
      * - Attempt to resolve via dependency container.
+     * - Check for explicitly provided parameter.
      * - Fallback to built-in type resolution.
+     * - Use default value if available.
      *
      * @param ReflectionParameter $reflectionParameter Parameter being resolved.
      * @param array $classNames Potential class names for the parameter.
@@ -609,8 +609,8 @@ class ReflectionFactory
      * @param ReflectionMethod|ReflectionFunction $method The method to analyze.
      * @param array $params Additional parameters to use in resolution.
      *
-     * @throws InvalidDefinition If a parameter cannot be resolved.
      * @throws Exception\NotInstantiable If a class cannot be instantiated.
+     * @throws InvalidDefinition If a parameter cannot be resolved.
      *
      * @return array Resolved method arguments.
      */
