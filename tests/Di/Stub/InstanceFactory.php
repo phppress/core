@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Stub class for testing.
