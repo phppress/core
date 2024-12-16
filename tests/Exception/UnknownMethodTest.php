@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 
 /**
- * Test case for the UnknownMethod class.
+ * Test case for the {@see UnknownMethod} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
