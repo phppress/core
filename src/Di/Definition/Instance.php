@@ -17,6 +17,17 @@ use PHPPress\Exception\InvalidArgument;
  * The following example shows how to configure a DI container with Instance:
  *
  * ```php
+ * $container = new Container(
+ *     [
+ *         'engine-one' => Stub\EngineMarkOne::class,
+ *         'engine-two' => Stub\EngineMarkTwo::class,
+ *             'instance' => [
+ *                 '__class' => Stub\ConstructorVariadic::class,
+ *                 '__construct()' => [Instance::of('engine-one'), Instance::of('engine-two')],
+ *             ],
+ *         ],
+ *     ],
+ * );
  * ```
  *
  * @copyright Copyright (C) 2024 PHPPress.
