@@ -41,7 +41,7 @@ trait MagicMethod
      * @throws InvalidCall If the property is write-only.
      * @throws UnknownProperty If the property is not defined.
      *
-     * @see __set()
+     * {@see __set()}
      */
     public function __get(string $name): mixed
     {
@@ -60,7 +60,7 @@ trait MagicMethod
      *
      * @return bool Whether the named property is set (not `null`).
      *
-     * @see https://www.php.net/manual/en/function.isset.php
+     * {@link {https://www.php.net/manual/en/function.isset.php}}
      */
     public function __isset(string $name): bool
     {
@@ -79,7 +79,7 @@ trait MagicMethod
      * @throws InvalidCall If the property is read-only.
      * @throws UnknownProperty If the property is not defined.
      *
-     * @see __get()
+     * {@see __get()}
      */
     public function __set(string $name, mixed $value): void
     {
@@ -99,7 +99,7 @@ trait MagicMethod
      *
      * @throws InvalidCall If the property is read only.
      *
-     * @see https://www.php.net/manual/en/function.unset.php
+     * {@link https://www.php.net/manual/en/function.unset.php}
      */
     public function __unset(string $name): void
     {
