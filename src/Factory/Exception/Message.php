@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Factory\Exception;
 
 /**
- * Represents the exception message for the Di component.
+ * Represents the exception message for the Factory component.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
