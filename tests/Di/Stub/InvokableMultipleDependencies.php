@@ -10,7 +10,7 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableMultipleDependencies
+final class InvokableMultipleDependencies
 {
     private EngineInterface $firstDependency;
     private InstanceInterface $secondDependency;

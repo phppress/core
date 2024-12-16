@@ -81,13 +81,13 @@ abstract class AbstractPropertyAccess
     {
         $getter = "get{$name}";
 
-        return static::hasMethod($object, $getter) ? $object->$getter() !== null : false;
+        return static::hasMethod($object, $getter) && $object->$getter() !== null;
     }
 
     /**
      * Checks if a class is a subclass of another class.
      *
-     * This method is similar to the `is_subclass_of()` function, but it does not trigger autoloading of classes.
+     * This method is similar to the `is_subclass_of()` function, but it does not trigger autoload of classes.
      * Unlike the `instanceof` operator, this method works with both objects and class names.
      *
      * @param object|string $object The object or class name to check.
@@ -107,21 +107,21 @@ abstract class AbstractPropertyAccess
      * A property is considered readable if:
      *
      * - The class has a getter method for the specified property name  (property name is case-insensitive);
-     * - The class has a member variable with the specified name (when `$stricMode` is `false`);
+     * - The class has a member variable with the specified name (when `$strictMode` is `false`);
      *
      * @param object $object The object to check for property readability.
      * @param string $name The name of the property to check.
-     * @param bool $stricMode Whether to consider member variables as readable properties. Defaults to `true`.
+     * @param bool $strictMode Whether to consider member variables as readable properties. Defaults to `true`.
      *
      * @return bool `true` if the property can be read, `false` otherwise.
      *
      * {@see isWritable()}
      */
-    public static function isReadable(object $object, string $name, bool $stricMode = true): bool
+    public static function isReadable(object $object, string $name, bool $strictMode = true): bool
     {
         $getter = "get{$name}";
 
-        return $stricMode === false
+        return $strictMode === false
             ? static::hasMethod($object, $getter)
             : self::propertyExists($object, $name) && static::hasMethod($object, $getter);
     }
@@ -132,21 +132,21 @@ abstract class AbstractPropertyAccess
      * A property is considered writable if:
      *
      * - The class has a setter method for the specified property name (property name is case-insensitive);
-     * - The class has a member variable with the specified name (when `$stricMode` is `true`);
+     * - The class has a member variable with the specified name (when `$strictMode` is `true`);
      *
-     * @param object $object The object to check for property writability.
+     * @param object $object The object to check for property writ-ability.
      * @param string $name The name of the property to check.
-     * @param bool $stricMode Whether to consider member variables as writable properties. Defaults to `true`.
+     * @param bool $strictMode Whether to consider member variables as writable properties. Defaults to `true`.
      *
      * @return bool `true` if the property can be written, `false` otherwise.
      *
      * @see isReadable()
      */
-    public static function isWritable(object $object, string $name, bool $stricMode = true): bool
+    public static function isWritable(object $object, string $name, bool $strictMode = true): bool
     {
         $setter = "set{$name}";
 
-        return $stricMode === false
+        return $strictMode === false
             ? static::hasMethod($object, $setter)
             : self::propertyExists($object, $name) && static::hasMethod($object, $setter);
     }

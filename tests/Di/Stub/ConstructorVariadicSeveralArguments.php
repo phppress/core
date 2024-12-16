@@ -17,9 +17,9 @@ final class ConstructorVariadicSeveralArguments
     private array $variadic;
 
     public function __construct(
-        private array $array,
-        private object $object,
-        private string $string,
+        private readonly array $array,
+        private readonly object $object,
+        private readonly string $string,
         EngineInterface|null ...$variadic,
     ) {
         $this->variadic = $variadic;

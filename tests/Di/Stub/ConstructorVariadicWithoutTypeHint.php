@@ -12,7 +12,7 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class ConstructorVariadicWithoutTypeHint
 {
-    private $variadic = [];
+    private $variadic;
 
     public function __construct(...$variadic)
     {

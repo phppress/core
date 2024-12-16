@@ -10,10 +10,7 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableIntersectionType
+final class InvokableUnknownClass
 {
-    public function __invoke(EngineInterface&EngineColorInterface $engine): int|string
-    {
-        return $engine->getColor();
-    }
+    public function __invoke(UnknownClass $unknownClass) {}
 }

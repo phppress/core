@@ -10,10 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class ConstructorDefaultValue
+final readonly class ConstructorDefaultValue
 {
     public function __construct(
-        private string $class = 'ConstructorDefaultValue',
+        private string               $class = 'ConstructorDefaultValue',
         private EngineInterface|null $engine = null,
     ) {}
 

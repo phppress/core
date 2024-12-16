@@ -14,3 +14,6 @@ parameters:
             identifier: trait.unused
         -
             identifier: catch.neverThrown
+        -
+            identifier: method.templateTypeNotInParameter
+

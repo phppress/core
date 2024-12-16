@@ -12,9 +12,9 @@ use function array_map;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableVariadicDefaultValue
+final class InvokableVariadicDefaultValue
 {
-    public function __invoke(string $class = 'InvokeableVariadicDefaultValue', EngineInterface ...$variadic): array
+    public function __invoke(string $class = 'InvokableVariadicDefaultValue', EngineInterface ...$variadic): array
     {
         return [
             'class' => $class,

@@ -106,11 +106,12 @@ class Container implements ContainerInterface
      *
      * @throws InvalidDefinition If the requested dependency has an invalid configuration.
      * @throws NotInstantiable If the requested dependency is an abstract class or an interface.
+     * @throws Throwable In case of circular references.
      *
      * @return mixed The fully resolved and instantiated dependency.
      *
      * @phpstan-template T
-     * @phpstan-param class-string<T> $id
+     * @phpstan-param class-string<T>|string $id
      * @phpstan-return T
      */
     public function get(string $id): mixed
@@ -125,8 +126,8 @@ class Container implements ContainerInterface
     /**
      * Returns the list of the object definitions or the loaded shared objects.
      *
-     * @return array The list of the object definitions or the loaded shared objects (type or 'id' => definition or
-     * instance).
+     * @return array The list of the object definitions or the loaded shared objects
+     * (type or 'id' => definition or instance).
      */
     public function getDefinitions(): array
     {

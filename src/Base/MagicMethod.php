@@ -60,7 +60,7 @@ trait MagicMethod
      *
      * @return bool Whether the named property is set (not `null`).
      *
-     * {@link {https://www.php.net/manual/en/function.isset.php}}
+     * {@link https://www.php.net/manual/en/function.isset.php}
      */
     public function __isset(string $name): bool
     {
@@ -98,6 +98,7 @@ trait MagicMethod
      * @param string $name The property name.
      *
      * @throws InvalidCall If the property is read only.
+     * @throws UnknownProperty If the property is not defined.
      *
      * {@link https://www.php.net/manual/en/function.unset.php}
      */

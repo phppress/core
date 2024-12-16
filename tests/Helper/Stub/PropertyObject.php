@@ -27,7 +27,7 @@ final class PropertyObject extends MagicObject
         $this->text = $value;
     }
 
-    public function getObject(): object|null
+    public function getObject(): object
     {
         if ($this->object === null) {
             $this->object = new self();
@@ -39,7 +39,7 @@ final class PropertyObject extends MagicObject
 
     public function getExecute(): callable
     {
-        return function ($param) {
+        return static function ($param) {
             return $param * 2;
         };
     }

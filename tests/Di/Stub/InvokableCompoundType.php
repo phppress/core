@@ -10,12 +10,14 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableVariadicWithoutTypeHint
+final class InvokableCompoundType
 {
-    public function __invoke(...$variadic): array
+    public function __invoke(array $array, callable $callable, object|null $object): array
     {
         return [
-            'variadic' => $variadic,
+            'array' => $array,
+            'callable' => $callable,
+            'object' => $object,
         ];
     }
 }

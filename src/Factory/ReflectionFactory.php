@@ -246,7 +246,6 @@ class ReflectionFactory
      *
      * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws InvalidDefinition If the method is not accessible or not found.
-     * @throws ReflectionException If reflection fails.
      *
      * @return object Configured object.
      */
@@ -532,6 +531,7 @@ class ReflectionFactory
      *
      * @throws Exception\NotInstantiable For instantiation failures.
      * @throws InvalidDefinition For unresolvable dependencies.
+     * @throws ReflectionException For reflection failures.
      *
      * @return array Fully resolved dependencies.
      */

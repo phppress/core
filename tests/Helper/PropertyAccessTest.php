@@ -18,6 +18,9 @@ use stdClass;
 #[Group('helpers')]
 final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @throws UnknownProperty If the property is unknown.
+     */
     public function testFailsForGetWriteOnlyProperty(): void
     {
         $object = $this->createObject();
@@ -30,6 +33,9 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         PropertyAccess::get($object, 'writeOnly');
     }
 
+    /**
+     * @throws InvalidCall If the property is read-only.
+     */
     public function testFailsForGetUnknownProperty(): void
     {
         $object = $this->createObject();
@@ -42,6 +48,9 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         PropertyAccess::get($object, 'unknown');
     }
 
+    /**
+     * @throws UnknownProperty If the property is unknown.
+     */
     public function testFailsForSetReadOnlyProperty(): void
     {
         $object = $this->createObject();
@@ -54,6 +63,9 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         PropertyAccess::set($object, 'object', new stdClass());
     }
 
+    /**
+     * @throws InvalidCall If the property is write-only.
+     */
     public function testFailsForSetUnknownProperty(): void
     {
         $object = $this->createObject();
@@ -66,6 +78,10 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         PropertyAccess::set($object, 'unknown', 'value');
     }
 
+    /**
+     * @throws UnknownProperty If the property is unknown.
+     * @throws InvalidCall If the property is write-only.
+     */
     public function testGet(): void
     {
         $object = $this->createObject();
@@ -87,7 +103,7 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(PropertyAccess::hasMethod($object, 'setWriteOnly'));
     }
 
-    public function testIsRedeable(): void
+    public function testIsReadable(): void
     {
         $object = $this->createObject();
 
@@ -97,7 +113,7 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(PropertyAccess::isReadable($object, 'text'));
     }
 
-    public function testIsRedeabeUsingStrictMode(): void
+    public function testIsReadableUsingStrictMode(): void
     {
         $object = $this->createObject();
 
@@ -134,13 +150,17 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(PropertyAccess::isWritable($object, 'text'));
     }
 
-    public function testIsWritableUsingStricMode(): void
+    public function testIsWritableUsingStrictMode(): void
     {
         $object = $this->createObject();
 
         $this->assertTrue(PropertyAccess::isWritable($object, 'writeOnly', false));
     }
 
+    /**
+     * @throws UnknownProperty If the property is unknown.
+     * @throws InvalidCall If the property is read-only.
+     */
     public function testSet(): void
     {
         $object = $this->createObject();
@@ -149,6 +169,10 @@ final class PropertyAccessTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('new text', PropertyAccess::get($object, 'text'));
     }
 
+    /**
+     * @throws UnknownProperty If the property is unknown.
+     * @throws InvalidCall If the property is read-only.
+     */
     public function testUnset(): void
     {
         $object = $this->createObject();
