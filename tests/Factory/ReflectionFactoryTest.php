@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Factory;
 
 use PHPPress\Di\Container;
+use PHPPress\Exception\InvalidDefinition;
 use PHPPress\Factory\ReflectionFactory;
 use PHPUnit\Framework\Attributes\Group;
+use Throwable;
 
 /**
- * Test case for the ReflectionFactory class.
+ * Test case for the {@see ReflectionFactory} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
- * @license GNU General Public License version 3 or later {@see \PHPPress\LICENSE}
+ * @license GNU General Public License version 3 or later {@see LICENSE}
  */
 #[Group('di')]
 final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
@@ -33,6 +35,10 @@ final class ReflectionFactoryTest extends \PHPUnit\Framework\TestCase
         parent::tearDown();
     }
 
+    /**
+     * @throws InvalidDefinition If dependencies cannot be resolved.
+     * @throws Throwable If the callback is not valid.
+     */
     public function testInvokeDefinitionUsingAdditionalParameters(): void
     {
         $invoke = $this->factory->invoke(

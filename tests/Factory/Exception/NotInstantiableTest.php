@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Tests\Di\Exception;
+namespace PHPPress\Tests\Factory\Exception;
 
 use PHPPress\Factory\Exception\NotInstantiable;
 use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 
 /**
- * Test case for the NotInstantiable class.
+ * Test case for the {@see NotInstantiable} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}

@@ -21,9 +21,11 @@ use PHPPress\Exception\InvalidArgument;
  *     [
  *         'engine-one' => Stub\EngineMarkOne::class,
  *         'engine-two' => Stub\EngineMarkTwo::class,
- *             'instance' => [
- *                 '__class' => Stub\ConstructorVariadic::class,
- *                 '__construct()' => [Instance::of('engine-one'), Instance::of('engine-two')],
+ *         'instance' => [
+ *             '__class' => Stub\ConstructorVariadic::class,
+ *             '__construct()' => [
+ *                 Instance::of('engine-one'),
+ *                 Instance::of('engine-two'),
  *             ],
  *         ],
  *     ],
@@ -38,7 +40,7 @@ readonly class Instance
     /**
      * @throws InvalidArgument if `$id` is an empty string.
      */
-    final public function __construct(public readonly string $id)
+    final public function __construct(public string $id)
     {
         if ($id === '') {
             throw new InvalidArgument('The required component "id" is empty.');

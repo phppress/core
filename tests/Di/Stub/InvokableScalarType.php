@@ -10,14 +10,15 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableCompundType
+final class InvokableScalarType
 {
-    public function __invoke(array $array, callable $callable, object|null $object): array
+    public function __invoke(bool $bool, int $int, float $float, string $string): array
     {
         return [
-            'array' => $array,
-            'callable' => $callable,
-            'object' => $object,
+            'bool' => $bool,
+            'int' => $int,
+            'float' => $float,
+            'string' => $string,
         ];
     }
 }

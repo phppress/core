@@ -10,13 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableDefaultValue
+final class InvokableVariadicCompoundType
 {
-    public function __invoke(string $class = 'InvokeableDefaultValue', EngineInterface|null $engine = null): array
+    public function __invoke(array|object|callable|null ...$variadic): array
     {
         return [
-            'class' => $class,
-            'engine' => $engine?->getName(),
+            'variadic' => $variadic,
         ];
     }
 }

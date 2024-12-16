@@ -10,15 +10,12 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableScalarType
+final class InvokableVariadicWithoutTypeHint
 {
-    public function __invoke(bool $bool, int $int, float $float, string $string): array
+    public function __invoke(...$variadic): array
     {
         return [
-            'bool' => $bool,
-            'int' => $int,
-            'float' => $float,
-            'string' => $string,
+            'variadic' => $variadic,
         ];
     }
 }

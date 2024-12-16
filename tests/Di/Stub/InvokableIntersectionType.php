@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
-use Psr\Container\ContainerInterface;
-
 /**
  * Stub class for testing.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeablePSRContainer
+final class InvokableIntersectionType
 {
-    public function __invoke(ContainerInterface $container): ContainerInterface
+    public function __invoke(EngineInterface&EngineColorInterface $engine): int|string
     {
-        return $container;
+        return $engine->getColor();
     }
 }

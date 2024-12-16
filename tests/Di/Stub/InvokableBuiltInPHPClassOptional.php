@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
-use DateTime;
+use Iterator;
 
 /**
  * Stub class for testing.
@@ -12,10 +12,12 @@ use DateTime;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableBuiltInPHPClass
+final class InvokableBuiltInPHPClassOptional
 {
-    public function __invoke(DateTime $dateTime): DateTime
+    public function __invoke(Iterator|null $iterator = null): array
     {
-        return $dateTime;
+        return [
+            'iterator' => $iterator,
+        ];
     }
 }

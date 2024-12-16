@@ -602,7 +602,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                             3,
                         ],
                         $object,
-                        'InvokeableVariadicSeveralArguments',
+                        'InvokableVariadicSeveralArguments',
                         new Stub\EngineMarkOne(),
                         new Stub\EngineMarkTwo(),
                     ],
@@ -621,7 +621,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                     3,
                 ],
                 'object' => $object,
-                'string' => 'InvokeableVariadicSeveralArguments',
+                'string' => 'InvokableVariadicSeveralArguments',
                 'variadic' => [
                     'Mark One',
                     'Mark Two',
@@ -771,7 +771,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                             3,
                         ],
                         'object' => $object,
-                        'string' => 'InvokeableVariadicSeveralArguments',
+                        'string' => 'InvokableVariadicSeveralArguments',
                         'variadic' => [
                             new Stub\EngineMarkOne(),
                             new Stub\EngineMarkTwo(),
@@ -792,7 +792,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                     3,
                 ],
                 'object' => $object,
-                'string' => 'InvokeableVariadicSeveralArguments',
+                'string' => 'InvokableVariadicSeveralArguments',
                 'variadic' => [
                     'Mark One',
                     'Mark Two',
@@ -816,7 +816,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                             new Stub\EngineMarkTwo(),
                         ],
                         'object' => $object,
-                        'string' => 'InvokeableVariadicSeveralArguments',
+                        'string' => 'InvokableVariadicSeveralArguments',
                         'array' => [
                             1,
                             2,
@@ -838,7 +838,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                     3,
                 ],
                 'object' => $object,
-                'string' => 'InvokeableVariadicSeveralArguments',
+                'string' => 'InvokableVariadicSeveralArguments',
                 'variadic' => [
                     'Mark One',
                     'Mark Two',

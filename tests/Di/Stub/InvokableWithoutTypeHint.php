@@ -10,10 +10,10 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class InvokeableOptional
+final class InvokableWithoutTypeHint
 {
-    public function __invoke(EngineInterface|null $engine = null): EngineInterface|null
+    public function __invoke($value): mixed
     {
-        return $engine ? new EngineCar($engine)->getEngine() : null;
+        return $value;
     }
 }

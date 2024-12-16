@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Support;
 
 use ReflectionClass;
+use ReflectionException;
 
+use function is_string;
 use function str_replace;
 
-/**
- * @psalm-suppress PropertyNotSetInConstructor
- */
 final class Assert
 {
     /**
-     * Asserting two strings equality ignoring line endings.
+     * Asserting two strings equalities ignoring line endings.
      *
      * @param string $expected The expected string.
      * @param string $actual The actual string.
@@ -33,6 +32,8 @@ final class Assert
      *
      * @param string|object $object The class name or object to get the property from.
      * @param string $propertyName The name of the property to get.
+     *
+     * @throws ReflectionException If the property does not exist.
      */
     public static function inaccessibleProperty(string|object $object, string $propertyName): mixed
     {
@@ -43,9 +44,7 @@ final class Assert
         }
 
         if ($propertyName !== '') {
-            $property = $reflection->getProperty($propertyName);
-
-            return $property->getValue($object);
+            return $reflection->getProperty($propertyName)->getValue($object);
         }
 
         return null;
@@ -57,6 +56,8 @@ final class Assert
      * @param string|object $object The class name or object to set the property on.
      * @param string $propertyName The name of the property to set.
      * @param mixed $value The value to set.
+     *
+     * @throws ReflectionException If the property does not exist.
      */
     public static function setInaccessibleProperty(string|object $object, string $propertyName, mixed $value): void
     {
@@ -70,7 +71,6 @@ final class Assert
 
         if ($propertyName !== '') {
             $property = $reflection->getProperty($propertyName);
-            $property->setAccessible(true);
             $property->setValue($object, $value);
         }
     }
