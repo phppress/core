@@ -8,7 +8,7 @@ use PHPPress\Helper\Configure;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test case for the Configure class.
+ * Test case for the {@see Configure} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -43,8 +43,13 @@ final class ConfigureTest extends \PHPUnit\Framework\TestCase
             $object,
             [
                 'property' => 'value',
-                'setMethod()' => ['param1', 'param2'],
-                'withImmutableProperty()' => [2],
+                'setMethod()' => [
+                    'param1',
+                    'param2',
+                ],
+                'withImmutableProperty()' => [
+                    2,
+                ],
             ],
         );
 

@@ -12,7 +12,7 @@ use function method_exists;
 use function property_exists;
 
 /**
- * Provides concrete implementation for {PropertyAccess}.
+ * Provides concrete implementation for {@see PropertyAccess}.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -30,7 +30,7 @@ abstract class AbstractPropertyAccess
      *
      * @return mixed The property value.
      *
-     * @see set()
+     * {@see set()}
      */
     public static function get(object $object, string $name): mixed
     {
@@ -75,7 +75,7 @@ abstract class AbstractPropertyAccess
      *
      * @return bool Whether the named property is set (not `null`).
      *
-     * @see https://www.php.net/manual/en/function.isset.php
+     * {@see https://www.php.net/manual/en/function.isset.php}
      */
     public static function isset(object $object, string $name): bool
     {
@@ -115,7 +115,7 @@ abstract class AbstractPropertyAccess
      *
      * @return bool `true` if the property can be read, `false` otherwise.
      *
-     * @see isWritable()
+     * {@see isWritable()}
      */
     public static function isReadable(object $object, string $name, bool $stricMode = true): bool
     {
@@ -161,7 +161,7 @@ abstract class AbstractPropertyAccess
      * @throws InvalidCall If the property is read-only.
      * @throws UnknownProperty If the property is not defined.
      *
-     * @see get()
+     * {@see get()}
      */
     public static function set(object $object, string $name, mixed $value): void
     {
@@ -188,7 +188,7 @@ abstract class AbstractPropertyAccess
      * @throws InvalidCall If the property is read only.
      * @throws UnknownProperty If the property is unknown.
      *
-     * @see https://www.php.net/manual/en/function.unset.php
+     * {@see https://www.php.net/manual/en/function.unset.php}
      */
     public static function unset(object $object, string $name): void
     {
