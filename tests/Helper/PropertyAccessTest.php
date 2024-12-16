@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Group;
 use stdClass;
 
 /**
- * Test case for the PropertyAccess class.
+ * Test case for the {@see PropertyAccess} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
