@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Stub;
 
+use function array_map;
+
 /**
  * Stub class for testing.
  *

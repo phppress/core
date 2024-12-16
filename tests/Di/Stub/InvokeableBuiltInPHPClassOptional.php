@@ -16,6 +16,8 @@ final class InvokeableBuiltInPHPClassOptional
 {
     public function __invoke(Iterator|null $iterator = null): array
     {
-        return ['iterator' => $iterator];
+        return [
+            'iterator' => $iterator,
+        ];
     }
 }

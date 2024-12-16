@@ -10,7 +10,7 @@ use PHPPress\Tests\Provider\ContainerProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
 
 /**
- * Test case for the Container class.
+ * Test case for the {@see Container} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -91,7 +91,9 @@ final class ContainerTest extends \PHPUnit\Framework\TestCase
         $definitions = [
             'instance' => [
                 'class' => Stub\Instance::class,
-                'a()' => [42],
+                'a()' => [
+                    42,
+                ],
             ],
         ];
 
