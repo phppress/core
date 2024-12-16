@@ -14,7 +14,7 @@ use function array_map;
  */
 final class ConstructorVariadic
 {
-    private array $variadic = [];
+    private array $variadic;
 
     public function __construct(EngineInterface ...$variadic)
     {

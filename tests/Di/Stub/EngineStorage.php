@@ -10,9 +10,9 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class EngineStorage
+final readonly class EngineStorage
 {
-    private readonly array $engines;
+    private array $engines;
 
     public function __construct(EngineInterface ...$engines)
     {

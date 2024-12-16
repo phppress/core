@@ -10,9 +10,9 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class Constructor
+final readonly class Constructor
 {
-    public function __construct(private readonly InstanceInterface $instance) {}
+    public function __construct(private InstanceInterface $instance) {}
 
     public function getConstructorArguments(): InstanceInterface
     {

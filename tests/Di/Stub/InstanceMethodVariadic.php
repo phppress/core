@@ -22,7 +22,7 @@ final class InstanceMethodVariadic
         $this->variadic = $variadic;
     }
 
-    public function variadicCompundTypes(array $array, EngineColorInterface|null ...$variadic): void
+    public function variadicCompoundTypes(array $array, EngineColorInterface|null ...$variadic): void
     {
         $this->array = $array;
         $this->variadic = $variadic;
@@ -57,10 +57,10 @@ final class InstanceMethodVariadic
         ];
     }
 
-    public function getVariadicCompundTypes(): array
+    public function getVariadicCompoundTypes(): array
     {
         return [
-            'compundTypes' => [
+            'compoundTypes' => [
                 'array' => $this->array,
                 'variadic' => array_map(
                     static fn(EngineColorInterface|null $engine): string|null => $engine?->getColor(),

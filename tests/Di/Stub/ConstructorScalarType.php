@@ -10,11 +10,16 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class ConstructorScalarType
+final readonly class ConstructorScalarType
 {
-    public function __construct(private bool $bool, private int $int, private float $float, private string $string) {}
+    public function __construct(
+        private bool   $bool,
+        private int    $int,
+        private float  $float,
+        private string $string,
+    ) {}
 
-    public function getContructorArguments(): array
+    public function getConstructorArguments(): array
     {
         return [
             'bool' => $this->bool,

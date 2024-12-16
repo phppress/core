@@ -13,14 +13,14 @@ namespace PHPPress\Tests\Di\Stub;
 final class EngineMarkTwo implements EngineInterface, EngineColorInterface
 {
     private string $color = 'red';
-    public const NAME = 'Mark Two';
-    public const NUMBER = 2;
+    public const string NAME = 'Mark Two';
+    public const int NUMBER = 2;
 
     public function __construct(private int $number = self::NUMBER) {}
 
     public function getName(): string
     {
-        return static::NAME;
+        return self::NAME;
     }
 
     public function setNumber(int $value): void

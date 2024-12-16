@@ -10,9 +10,9 @@ namespace PHPPress\Tests\Di\Stub;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-final class EngineCarTunning
+final readonly class EngineCarTunning
 {
-    public function __construct(private readonly EngineCar $engineCar) {}
+    public function __construct(private EngineCar $engineCar) {}
 
     public function getEngineCar(): EngineCar
     {

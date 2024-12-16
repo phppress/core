@@ -126,7 +126,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 'instance' => [
-                    '__class' => Stub\ConstructorCompundType::class,
+                    '__class' => Stub\ConstructorCompoundType::class,
                     '__construct()' => [
                         [
                             1,
@@ -188,7 +188,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorScalarType::class, $instance);
         $this->assertSame(
             ['bool' => true, 'int' => 1, 'float' => 2.3, 'string' => 'scalar'],
-            $instance->getContructorArguments(),
+            $instance->getConstructorArguments(),
         );
     }
 
@@ -217,7 +217,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 'instance' => [
-                    '__class' => Stub\ConstructorCompundType::class,
+                    '__class' => Stub\ConstructorCompoundType::class,
                     '__construct()' => [
                         'array' => [
                             1,
@@ -279,7 +279,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorScalarType::class, $instance);
         $this->assertSame(
             ['bool' => true, 'int' => 1, 'float' => 2.3, 'string' => 'scalar'],
-            $instance->getContructorArguments(),
+            $instance->getConstructorArguments(),
         );
     }
 
@@ -517,7 +517,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 'instance' => [
-                    '__class' => Stub\ConstructorVariadicCompundType::class,
+                    '__class' => Stub\ConstructorVariadicCompoundType::class,
                     '__construct()' => [
                         [
                             false,
@@ -533,7 +533,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
 
         $instance = $container->get('instance');
 
-        $this->assertInstanceOf(Stub\ConstructorVariadicCompundType::class, $instance);
+        $this->assertInstanceOf(Stub\ConstructorVariadicCompoundType::class, $instance);
         $this->assertSame(
             ['variadic' => [[false, true], $callable, $object, null]],
             $instance->getConstructorArguments(),
@@ -680,7 +680,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $container = $this->createContainer(
             [
                 'instance' => [
-                    '__class' => Stub\ConstructorVariadicCompundType::class,
+                    '__class' => Stub\ConstructorVariadicCompoundType::class,
                     '__construct()' => [
                         'variadic' => [
                             [
@@ -698,7 +698,7 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
 
         $instance = $container->get('instance');
 
-        $this->assertInstanceOf(Stub\ConstructorVariadicCompundType::class, $instance);
+        $this->assertInstanceOf(Stub\ConstructorVariadicCompoundType::class, $instance);
         $this->assertSame(
             ['variadic' => [[false, true], $callable, $object, null]],
             $instance->getConstructorArguments(),

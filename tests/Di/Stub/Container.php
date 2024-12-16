@@ -16,7 +16,7 @@ final class Container implements ContainerInterface
 {
     public function get(string $id): mixed
     {
-        return $this;
+        return null;
     }
 
     public function has(string $id): bool

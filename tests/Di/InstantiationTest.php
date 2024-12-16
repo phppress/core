@@ -621,13 +621,13 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['variadic' => ['Mark One', 'Mark Two']], $instance->getVariadic());
     }
 
-    public function testVariadicMethodDefinitionUsingIndexedParametersAndCompundTypesAndSeveralArguments(): void
+    public function testVariadicMethodDefinitionUsingIndexedParametersAndCompoundTypesAndSeveralArguments(): void
     {
         $container = $this->createContainer(
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadicCompundTypes()' => [
+                    'variadicCompoundTypes()' => [
                         [
                             1,
                             2,
@@ -647,7 +647,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
         $this->assertSame(
             [
-                'compundTypes' => [
+                'compoundTypes' => [
                     'array' => [
                         1,
                         2,
@@ -659,7 +659,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-            $instance->getVariadicCompundTypes(),
+            $instance->getVariadicCompoundTypes(),
         );
     }
 
@@ -731,13 +731,13 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['variadic' => ['Mark One', 'Mark Two']], $instance->getVariadic());
     }
 
-    public function testVariadicMethodDefinitionUsingNamedParametersAndCompundTypesAndSeveralArguments(): void
+    public function testVariadicMethodDefinitionUsingNamedParametersAndCompoundTypesAndSeveralArguments(): void
     {
         $container = $this->createContainer(
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadicCompundTypes()' => [
+                    'variadicCompoundTypes()' => [
                         'array' => [
                             1,
                             2,
@@ -757,7 +757,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
         $this->assertSame(
             [
-                'compundTypes' => [
+                'compoundTypes' => [
                     'array' => [
                         1,
                         2,
@@ -769,7 +769,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-            $instance->getVariadicCompundTypes(),
+            $instance->getVariadicCompoundTypes(),
         );
     }
 
@@ -819,13 +819,13 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testVariadicMethodDefinitionUsingNamedParametersAndCompundTypesAndSeveralArgumentsDisordered(): void
+    public function testVariadicMethodDefinitionUsingNamedParametersAndCompoundTypesAndSeveralArgumentsDisordered(): void
     {
         $container = $this->createContainer(
             [
                 'instance' => [
                     '__class' => Stub\InstanceMethodVariadic::class,
-                    'variadicCompundTypes()' => [
+                    'variadicCompoundTypes()' => [
                         'variadic' => [
                             new Stub\EngineMarkTwo(),
                             null,
@@ -845,7 +845,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\InstanceMethodVariadic::class, $instance);
         $this->assertSame(
             [
-                'compundTypes' => [
+                'compoundTypes' => [
                     'array' => [
                         1,
                         2,
@@ -857,7 +857,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
                     ],
                 ],
             ],
-            $instance->getVariadicCompundTypes(),
+            $instance->getVariadicCompoundTypes(),
         );
     }
 

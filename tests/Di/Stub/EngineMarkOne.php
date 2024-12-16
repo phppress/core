@@ -12,14 +12,14 @@ namespace PHPPress\Tests\Di\Stub;
  */
 final class EngineMarkOne implements EngineInterface
 {
-    public const NAME = 'Mark One';
-    public const NUMBER = 1;
+    public const string NAME = 'Mark One';
+    public const int NUMBER = 1;
 
     public function __construct(private int $number = self::NUMBER) {}
 
     public function getName(): string
     {
-        return static::NAME;
+        return self::NAME;
     }
 
     public function setNumber(int $value): void
