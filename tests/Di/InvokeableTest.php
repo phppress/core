@@ -587,7 +587,7 @@ final class InvokeableTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->expectException(InvalidDefinition::class);
-        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():517}"."');
+        $this->expectExceptionMessage('Invalid definition: "Missing required parameter "requiredParam" when calling "{closure:PHPPress\Tests\Di\InvokeableTest::testFailsForDefinitionUsingClosureWithMissingRequiredParameter():585}"."');
 
         $container->get('instance');
     }
