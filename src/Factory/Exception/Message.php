@@ -12,7 +12,6 @@ namespace PHPPress\Factory\Exception;
  */
 enum Message: string
 {
-    case DEFINITION_EMPTY = 'The definition is empty.';
     case DEFINITION_INVALID = 'Invalid definition for "%s": %s';
     case DEFINITION_REQUIRES_CLASS_OPTION = 'A class definition requires a "__class" or "class" member.';
     case DEFINITION_TYPE_UNSUPPORTED = 'Unsupported definition type for "%s".';
@@ -25,7 +24,6 @@ enum Message: string
     public function getMessage(string ...$argument): string
     {
         return match ($this) {
-            self::DEFINITION_EMPTY,
             self::DEFINITION_REQUIRES_CLASS_OPTION,
             self::DEPENDENCIES_IDX_NAME_POSITION => $this->value,
             self::DEFINITION_INVALID,
