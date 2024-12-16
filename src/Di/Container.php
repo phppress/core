@@ -22,15 +22,15 @@ use function is_string;
  * Container implements a dependency injection (DI) container for managing object creation and dependencies.
  *
  * Key features:
- * - Supports constructor and property injection.
- * - Manages object lifecycles (singleton and transient).
  * - Autowiring capabilities.
  * - Flexible definition of dependencies.
+ * - Manages object lifecycles (singleton and transient).
+ * - Supports constructor and property injection.
  *
  * The container can:
  * - Automatically resolve and instantiate class dependencies.
- * - Configure and inject dependencies.
  * - Cache and reuse singleton instances.
+ * - Configure and inject dependencies.
  *
  * Usage example:
  * ```php
@@ -173,10 +173,10 @@ class Container implements ContainerInterface
      *
      * @param string $class The fully qualified class name, interface name, or alias to register.
      * @param mixed $definitions The definition for the class. Can be:
-     * - A callable function with signature `function ($container, $params)`.
-     * - A string representing another class name.
-     * - An array of configuration options.
      * - An object instance.
+     * - An array of configuration options.
+     * - A string representing another class name.
+     * - A callable function with signature `function ($container, $params)`.
      *
      * @throws InvalidDefinition If the provided definition is invalid or cannot be processed.
      *
@@ -247,11 +247,11 @@ class Container implements ContainerInterface
     /**
      * Returns an instance of the requested class.
      *
-     * Note that if the class is declared to be singleton by calling {setSingleton()}, the same instance of the class
-     * will be returned each time this method is called.
+     * Note that if the class is declared to be singleton by calling {@see setSingleton()}, the same instance of the
+     * class  will be returned each time this method is called.
      *
      * @param string $id The class Instance, name, or an alias name (e.g. `foo`) that was previously registered
-     * via {set()} or {setSingleton()}.
+     * via {@see set()} or {@see setSingleton()}.
      *
      * @throws InvalidDefinition If the class cannot be recognized or correspond to an invalid definition.
      * @throws NotInstantiable If resolved to an abstract class or an interface.
