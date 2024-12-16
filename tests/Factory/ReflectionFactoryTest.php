@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Tests\Di;
+namespace PHPPress\Tests\Factory;
 
-use PHPPress\Di\{Container, ReflectionFactory};
+use PHPPress\Di\Container;
+use PHPPress\Factory\ReflectionFactory;
 use PHPUnit\Framework\Attributes\Group;
 
 /**

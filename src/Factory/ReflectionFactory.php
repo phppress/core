@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace PHPPress\Di;
+namespace PHPPress\Factory;
 
 use Closure;
-use Exception;
-use PHPPress\Di\Exception\{Message, NotInstantiable};
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\InvalidDefinition;
 use PHPPress\Helper\Arr;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -24,7 +24,11 @@ use function array_key_exists;
 use function get_class;
 use function in_array;
 use function is_array;
+use function is_callable;
+use function is_object;
+use function is_string;
 use function method_exists;
+use function str_contains;
 use function str_ends_with;
 use function substr;
 
@@ -36,15 +40,15 @@ use function substr;
  *
  * Key Features:
  * - Automatic dependency resolution.
- * - Support for complex parameter types (union, intersection).
- * - Reflection and dependency caching.
  * - Dependency configuration validation.
+ * - Reflection and dependency caching.
+ * - Support for complex parameter types (union, intersection).
  *
  * Provides a robust mechanism for:
+ * - Configuring object properties and methods.
+ * - Handling various type hinting scenarios.
  * - Instantiating classes with automatic constructor dependency injection.
  * - Resolving dependencies for callable methods and functions.
- * - Handling various type hinting scenarios.
- * - Configuring object properties and methods.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
@@ -68,7 +72,7 @@ class ReflectionFactory
      */
     private array $reflections = [];
 
-    public function __construct(private readonly Container $container) {}
+    public function __construct(private readonly ContainerInterface $container) {}
 
     /**
      * Determines if a class can be automatically instantiated.
@@ -76,6 +80,7 @@ class ReflectionFactory
      * Checks whether a given class or interface can be instantiated without manual configuration.
      *
      * @param string $id Fully qualified class or interface name.
+     *
      * @return bool Returns `true` if the class can be autowired, `false` otherwise.
      *
      * ```php
@@ -99,23 +104,17 @@ class ReflectionFactory
      * Creates an instance of a class with resolved dependencies.
      *
      * This method builds an object by:
-     * - Retrieving constructor dependencies.
+     * - Filtered out magic methods that are not suitable for reflection.
+     * - Instantiating the object.
      * - Merging default and custom dependencies.
      * - Resolving all dependencies.
-     * - Instantiating the object.
+     * - Retrieving constructor dependencies.
      *
      * @param string $class Fully qualified class name to instantiate.
      * @param array $definitions Additional configuration for object creation.
      * - Use `__construct()` key for constructor parameters.
      * - Use method names with `()` suffix for method injections.
      * - Use property names for direct property setting.
-     *
-     * @return object The fully constructed and configured object instance.
-     *
-     * @throws InvalidDefinition If dependency definition is incorrect.
-     * @throws NotInstantiable If the class cannot be instantiated.
-     *
-     * @phpstan-param array<string, mixed> $definitions
      *
      * ```php
      * $user = $reflectionFactory->create(
@@ -127,6 +126,12 @@ class ReflectionFactory
      *     ],
      * );
      * ```
+     *
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If dependency definition is incorrect.
+     * @throws ReflectionException If reflection fails.
+     *
+     * @return mixed The fully constructed and configured object instance.
      */
     public function create(string $class, array $definitions = []): mixed
     {
@@ -161,16 +166,16 @@ class ReflectionFactory
      * @param array|callable|Closure|string $callback The callable to resolve dependencies for.
      * @param array $params Additional parameters for dependency resolution.
      *
-     * @return mixed Result of invoking the callback with resolved dependencies.
-     *
      * @throws InvalidDefinition If dependencies cannot be resolved.
      * @throws Throwable If the callback is not valid.
      *
-     * @phpstan-param array<string|int, mixed> $params
+     * @return mixed Result of invoking the callback with resolved dependencies.
      *
      * ```php
      * $result = $reflectionFactory->invoke([UserService::class, 'createUser'], ['username' => 'john_doe']);
      * ```
+     *
+     * @phpstan-param array<string|int, mixed> $params
      */
     public function invoke(array|callable|Closure|string $callback, array $params = []): mixed
     {
@@ -180,16 +185,70 @@ class ReflectionFactory
     }
 
     /**
+     * Normalizes the class definition.
+     *
+     * @param string $class The class name.
+     * @param mixed $definition The class definition.
+     *
+     * @throws InvalidDefinition If the definition is invalid.
+     *
+     * @return array|callable|string|object The normalized class definition.
+     */
+    public function normalizeDefinition(string $class, mixed $definition): array|callable|string|object
+    {
+        if ($definition === null || $definition === []) {
+            return ['class' => $class];
+        }
+
+        if (is_string($definition)) {
+            if ($this->canBeAutowired($definition) === false) {
+                throw new InvalidDefinition(Exception\Message::DEFINITION_INVALID->getMessage($class, $definition));
+            }
+
+            return ['class' => $definition];
+        }
+
+        if ($definition instanceof Instance) {
+            return ['class' => $definition->id];
+        }
+
+        if (is_callable($definition, true) || is_object($definition)) {
+            return $definition;
+        }
+
+        if (is_array($definition)) {
+            if (!isset($definition['class']) && isset($definition['__class'])) {
+                $definition['class'] = $definition['__class'];
+
+                unset($definition['__class']);
+            }
+
+            if (!isset($definition['class'])) {
+                if (str_contains($class, '\\')) {
+                    $definition['class'] = $class;
+                } else {
+                    throw new InvalidDefinition(Exception\Message::DEFINITION_REQUIRES_CLASS_OPTION->getMessage());
+                }
+            }
+
+            return $definition;
+        }
+
+        throw new InvalidDefinition(Exception\Message::DEFINITION_TYPE_UNSUPPORTED->getMessage(gettype($definition)));
+    }
+
+    /**
      * Resolves dependencies and configures an object by calling a specific method.
      *
      * @param object $object The object to configure.
      * @param string $method The method to call.
      * @param array $definitions Method call configurations and parameters.
      *
-     * @return object Configured object.
-     *
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws InvalidDefinition If the method is not accessible or not found.
-     * @throws NotInstantiable If the object cannot be instantiated.
+     * @throws ReflectionException If reflection fails.
+     *
+     * @return object Configured object.
      */
     private function configureObjectMethod(object $object, string $method, array $definitions = []): object
     {
@@ -198,7 +257,7 @@ class ReflectionFactory
 
             if ($reflection->isPublic() === false) {
                 throw new InvalidDefinition(
-                    Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object)),
+                    Exception\Message::METHOD_NOT_ACCESSIBLE->getMessage($method, get_class($object)),
                 );
             }
 
@@ -206,10 +265,8 @@ class ReflectionFactory
             $result = $reflection->invokeArgs($object, $resolvedParams);
 
             return $result instanceof $object ? $result : $object;
-        } catch (ReflectionException $e) {
-            throw new InvalidDefinition(
-                Message::METHOD_NOT_FOUND->getMessage($method, get_class($object)),
-            );
+        } catch (ReflectionException) {
+            throw new InvalidDefinition(Exception\Message::METHOD_NOT_FOUND->getMessage($method, get_class($object)));
         }
     }
 
@@ -218,10 +275,12 @@ class ReflectionFactory
      *
      * @param string $class The class to instantiate.
      * @param array $constructorParams Constructor parameters.
-     * @return object Instantiated object.
      *
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
      * @throws InvalidDefinition If the class has invalid dependencies.
-     * @throws NotInstantiable If the class cannot be instantiated.
+     * @throws ReflectionException If reflection fails.
+     *
+     * @return object The fully constructed object instance.
      */
     private function createInstance(string $class, array $constructorParams = []): object
     {
@@ -232,7 +291,7 @@ class ReflectionFactory
         $resolveDependencies = $this->resolveDependencies($mergeDependencies);
 
         if ($this->canBeAutowired($class) === false) {
-            throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
+            throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
         return $reflection->newInstanceArgs($resolveDependencies);
@@ -242,9 +301,9 @@ class ReflectionFactory
      * Extracts class names from a reflection type, handling various type scenarios.
      *
      * This method supports:
+     * - Intersection types.
      * - Simple named types.
      * - Union types.
-     * - Intersection types.
      *
      * Prioritizes non-built-in types (classes and interfaces).
      *
@@ -286,20 +345,21 @@ class ReflectionFactory
      * Retrieves and caches dependencies for a specific class.
      *
      * Performs the following operations:
-     * - Checks for cached dependencies.
-     * - Reflects on the class constructor.
      * - Analyzes constructor parameters.
      * - Caches reflection and dependencies for future use.
+     * - Checks for cached dependencies.
+     * - Reflects on the class constructor.
      *
      * @param string $class The fully qualified class name to inspect.
+     * @param array $params Optional explicit parameters to override automatic resolution.
      *
-     * @throws NotInstantiable If the class cannot be reflected or instantiated.
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the class has invalid dependencies.
+     * @throws ReflectionException If reflection fails.
      *
      * @return array A tuple containing:
      * - ReflectionClass instance
      * - Array of dependencies
-     *
-     * @phpstan-return array{ReflectionClass, array}
      */
     private function getDependencies(string $class, array $params = []): array
     {
@@ -311,9 +371,10 @@ class ReflectionFactory
 
         try {
             $reflection = new ReflectionClass($class);
+
             $this->reflections[$class] = $reflection;
-        } catch (ReflectionException $e) {
-            throw new NotInstantiable(Message::INSTANTIATION_FAILED->getMessage($class));
+        } catch (ReflectionException) {
+            throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
         $reflectionMethod = match ($reflection->isInternal()) {
@@ -337,16 +398,15 @@ class ReflectionFactory
      * parameters, and the dependency injection container.
      *
      * Supports:
-     * - Static methods.
-     * - Instance methods.
      * - Closures.
+     * - Instance methods.
      * - Regular functions.
+     * - Static methods.
      * - Variadic parameters.
      *
      * @param array|callable|Closure|string $callback The callable to resolve dependencies for.
      * @param array $params Optional explicit parameters to override automatic resolution.
      *
-     * @throws InvalidDefinition If a dependency cannot be resolved or if dependencies are in an invalid format.
      * @throws Throwable If the callback is not valid or callable.
      *
      * @return array Resolved dependencies ready to be used as function arguments.
@@ -382,6 +442,10 @@ class ReflectionFactory
      * @param object $object The object to potentially invoke.
      * @param array $invokeDefinitions Invoke method configurations.
      *
+     * @throws Exception\NotInstantiable If the class cannot be instantiated.
+     * @throws InvalidDefinition If the object is not invokable.
+     * @throws ReflectionException If reflection fails.
+     *
      * @return mixed The result of invoking the object or the object itself.
      */
     private function handleInvokableObject(object $object, array $invokeDefinitions = []): mixed
@@ -389,17 +453,16 @@ class ReflectionFactory
         $reflection = new ReflectionMethod($object, '__invoke');
 
         $resolvedParams = $this->resolveMethodParameters($reflection, $invokeDefinitions);
-        $result = $reflection->invokeArgs($object, $resolvedParams);
 
-        return $result;
+        return $reflection->invokeArgs($object, $resolvedParams);
     }
 
     /**
      * Merges dependency arrays with intelligent combination strategy.
      *
      * Handles two merge scenarios:
-     * - Numeric array: Replaces entire dependencies.
      * - Associative array: Replaces specific dependencies.
+     * - Numeric array: Replaces entire dependencies.
      *
      * @param array $a Original dependencies array.
      * @param array $b New dependencies to merge.
@@ -451,7 +514,7 @@ class ReflectionFactory
         }
 
         throw new InvalidDefinition(
-            Message::PARAMETER_MISSING->getMessage(
+            Exception\Message::PARAMETER_MISSING->getMessage(
                 $name,
                 $reflectionParameter->getDeclaringFunction()->getName(),
             ),
@@ -464,13 +527,11 @@ class ReflectionFactory
      * Handles complex dependency scenarios:
      * - Resolves Instance placeholders using the container.
      * - Supports nested dependency resolution.
-     * - Handles optional dependencies.
      *
      * @param array $dependencies List of dependencies to resolve.
      *
-     * @throws Exception If dependency resolution fails.
+     * @throws Exception\NotInstantiable For instantiation failures.
      * @throws InvalidDefinition For unresolvable dependencies.
-     * @throws NotInstantiable For instantiation failures.
      *
      * @return array Fully resolved dependencies.
      */
@@ -491,10 +552,10 @@ class ReflectionFactory
      * Resolves a single dependency for a method or function parameter.
      *
      * Comprehensive resolution strategy:
-     * - Check for explicitly provided parameter.
-     * - Use default value if available.
      * - Attempt to resolve via dependency container.
+     * - Check for explicitly provided parameter.
      * - Fallback to built-in type resolution.
+     * - Use default value if available.
      *
      * @param ReflectionParameter $reflectionParameter Parameter being resolved.
      * @param array $classNames Potential class names for the parameter.
@@ -505,8 +566,6 @@ class ReflectionFactory
      * @throws InvalidDefinition If dependency cannot be resolved.
      *
      * @return mixed Resolved dependency value.
-     *
-     * @phpstan-param list<class-string> $classNames
      */
     private function resolveDependency(
         ReflectionParameter $reflectionParameter,
@@ -530,7 +589,7 @@ class ReflectionFactory
 
             try {
                 return $this->container->get($className);
-            } catch (NotInstantiable) {
+            } catch (Exception\NotInstantiable) {
                 continue;
             }
         }
@@ -539,18 +598,19 @@ class ReflectionFactory
     }
 
     /**
-     * Resolves method parameters using reflection, supporting constructors, invoke methods, and custom methods, and
-     * filtering of magic methods.
+     * Resolves method parameters using reflection, supporting constructors, invoke methods, and custom methods.
      *
      * Performs a comprehensive analysis of method parameters:
-     * - Checks for magic methods and skips reflection.
+     * - Handles variadic and non-variadic arguments.
      * - Reflects on the method parameters.
      * - Resolves dependencies for each parameter.
-     * - Handles variadic and non-variadic arguments.
      * - Resolves instance dependencies.
      *
      * @param ReflectionMethod|ReflectionFunction $method The method to analyze.
      * @param array $params Additional parameters to use in resolution.
+     *
+     * @throws Exception\NotInstantiable If a class cannot be instantiated.
+     * @throws InvalidDefinition If a parameter cannot be resolved.
      *
      * @return array Resolved method arguments.
      */
@@ -558,7 +618,7 @@ class ReflectionFactory
     {
         $args = [];
 
-        $isAsociativeParams = Arr::isAssociative($params);
+        $isAssociativeParams = Arr::isAssociative($params);
 
         $this->validateDependencies($params);
 
@@ -566,15 +626,15 @@ class ReflectionFactory
             $type = $reflectionParameter->getType();
             $name = $reflectionParameter->getName();
 
-            $key = $isAsociativeParams ? $name : $key;
+            $key = $isAssociativeParams ? $name : $key;
 
             $classNames = $this->getClassName($type);
 
             if ($reflectionParameter->isVariadic() === true) {
                 $resolvedParams = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
-                $varadicArgs = is_array($resolvedParams) ? $resolvedParams : [$resolvedParams];
+                $variadicArgs = is_array($resolvedParams) ? $resolvedParams : [$resolvedParams];
 
-                $args = [...$args, ...$varadicArgs];
+                $args = [...$args, ...$variadicArgs];
             } else {
                 $args[] = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
             }
@@ -586,11 +646,12 @@ class ReflectionFactory
     /**
      * Determines if a magic method should be skipped during reflection.
      *
-     * Filters out magic methods that are typically not suitable for dependency injection
-     * or method invocation resolution.
+     * Filters out magic methods that are typically not suitable for dependency injection or method invocation
+     * resolution.
      *
-     * @param string $methodName Name of the method to check
-     * @return bool True if the method should be skipped, false otherwise
+     * @param string $methodName Name of the method to check.
+     *
+     * @return bool `true` if the method should be skipped, `false` otherwise.
      */
     private function shouldSkipReflectionForMagicMethod(string $methodName): bool
     {
@@ -614,8 +675,8 @@ class ReflectionFactory
      * Validates the format of dependencies passed during object creation.
      *
      * Ensures dependencies are provided in a valid format:
-     * - Numeric (indexed) array.
      * - Associative array.
+     * - Numeric (indexed) array.
      *
      * @param array $parameters Dependencies to validate.
      *
@@ -631,6 +692,6 @@ class ReflectionFactory
             return;
         }
 
-        throw new InvalidDefinition(Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
+        throw new InvalidDefinition(Exception\Message::DEPENDENCIES_IDX_NAME_POSITION->getMessage());
     }
 }

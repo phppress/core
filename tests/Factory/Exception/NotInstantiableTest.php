@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di\Exception;
 
-use PHPPress\Di\Exception\NotInstantiable;
+use PHPPress\Factory\Exception\NotInstantiable;
 use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di;
 
-use PHPPress\Di\{Container, Instance};
+use PHPPress\Di\Container;
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Tests\Provider\ContainerProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
 

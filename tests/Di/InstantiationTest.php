@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Di;
 
-use PHPPress\Di\Exception\NotInstantiable;
-use PHPPress\Di\{Container, Instance};
+use PHPPress\Di\Container;
+use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\InvalidDefinition;
-use PHPUnit\Framework\Attributes\{Group};
+use PHPPress\Factory\Exception\NotInstantiable;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test cases for dependency injection container instantiation functionality.
