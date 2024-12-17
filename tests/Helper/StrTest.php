@@ -27,7 +27,7 @@ final class StrTest extends \PHPUnit\Framework\TestCase
     public function testMatchWildcardUsingEscapeFalseValue(
         string $pattern,
         string $string,
-        bool $expected
+        bool $expected,
     ): void {
         $this->assertSame($expected, Str::matchWildcard($pattern, $string, escape: false));
     }
