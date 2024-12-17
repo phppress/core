@@ -22,7 +22,7 @@ final class StrTest extends \PHPUnit\Framework\TestCase
         string $pattern,
         string $string,
         bool $expected,
-        false|null $caseSensitive = null
+        false|null $caseSensitive = null,
     ): void {
         match ($caseSensitive) {
             false => $this->assertSame($expected, Str::matchWildcard($pattern, $string, false)),
