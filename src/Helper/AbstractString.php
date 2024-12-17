@@ -50,27 +50,6 @@ abstract class AbstractString
         bool $escape = true,
         bool $filePath = false,
     ): bool {
-        return self::doMatch($pattern, $string, $caseSensitive, $escape, $filePath);
-    }
-
-    /**
-     * Performs the actual wildcard pattern matching by converting wildcards to regular expressions.
-     *
-     * @param string $pattern The wildcard pattern to be converted to regex.
-     * @param string $string The string to match against the pattern.
-     * @param bool $caseSensitive Whether to perform case-sensitive matching.
-     * @param bool $escape Whether to support escape sequences with backslash.
-     * @param bool $filePath Whether to match file paths.
-     *
-     * @return bool `true` if the string matches the pattern, `false` otherwise.
-     */
-    private static function doMatch(
-        string $pattern,
-        string $string,
-        bool $caseSensitive,
-        bool $escape,
-        bool $filePath,
-    ): bool {
         if ($pattern === '*' && $filePath === false) {
             return true;
         }
@@ -86,13 +65,13 @@ abstract class AbstractString
             $replacements['\?'] = '[^/\\\\]';
         }
 
-        $pattern = strtr(preg_quote($pattern, '#'), $replacements);
-        $pattern = "#^{$pattern}$#us";
+        $quotedPattern = strtr(preg_quote($pattern, '#'), $replacements);
+        $regexPattern = "#^{$quotedPattern}$#us";
 
         if ($caseSensitive === false) {
-            $pattern .= 'i';
+            $regexPattern .= 'i';
         }
 
-        return preg_match($pattern, $string) === 1;
+        return preg_match($regexPattern, $string) === 1;
     }
 }

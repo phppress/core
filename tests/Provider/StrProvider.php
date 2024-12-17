@@ -53,6 +53,9 @@ final class StrProvider
             // -
             ['a-z', 'a-z', true],
             ['a-z', 'a-c', false],
+            // case
+            ['Hello*', 'helloWorld', false],
+            ['Hello*', 'helloWorld', true, false],
             // slashes
             ['begin/*/end', 'begin/middle/end', true],
             ['begin/*/end', 'begin/two/steps/end', true],
@@ -64,9 +67,6 @@ final class StrProvider
             ['begin.*.end', 'begin.middle.end', true],
             ['begin.*.end', 'begin.two.steps.end', true],
             ['begin.*.end', 'begin.end', false],
-            // case
-            ['begin*end', 'BEGIN-middle-END', false],
-            ['begin*end', 'BEGIN-middle-END', true, false],
             // escaping
             ['\*\?', '*?', true],
             ['\*\?', 'zz', false],
@@ -82,9 +82,9 @@ final class StrProvider
     public static function matchWildcardUsingEscapeFalseValue(): array
     {
         return [
-            ['begin\*\end', 'begin\middle\end', true, true, false],
-            ['begin\*\end', 'begin\two\steps\end', true, true, false],
-            ['begin\*\end', 'begin\end', false, true, false],
+            ['begin\*\end', 'begin\middle\end', true],
+            ['begin\*\end', 'begin\two\steps\end', true],
+            ['begin\*\end', 'begin\end', false],
         ];
     }
 

@@ -18,9 +18,16 @@ use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
 final class StrTest extends \PHPUnit\Framework\TestCase
 {
     #[DataProviderExternal(StrProvider::class, 'matchWildcard')]
-    public function testMatchWildcard(string $pattern, string $string, bool $expected, bool $caseSensitive = true): void
-    {
-        $this->assertSame($expected, Str::matchWildcard($pattern, $string, $caseSensitive));
+    public function testMatchWildcard(
+        string $pattern,
+        string $string,
+        bool $expected,
+        false|null $caseSensitive = null
+    ): void {
+        match ($caseSensitive) {
+            false => $this->assertSame($expected, Str::matchWildcard($pattern, $string, false)),
+            default => $this->assertSame($expected, Str::matchWildcard($pattern, $string)),
+        };
     }
 
     #[DataProviderExternal(StrProvider::class, 'matchWildcardUsingEscapeFalseValue')]
