@@ -16,7 +16,6 @@ use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use ReflectionType;
 use ReflectionUnionType;
 use Throwable;
 
@@ -289,10 +288,6 @@ class ReflectionFactory
         $mergeDependencies = $this->mergeDependencies($dependencies, $constructorParams);
         $resolveDependencies = $this->resolveDependencies($mergeDependencies);
 
-        if ($this->canBeAutowired($class) === false) {
-            throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
-        }
-
         return $reflection->newInstanceArgs($resolveDependencies);
     }
 
@@ -306,16 +301,16 @@ class ReflectionFactory
      *
      * Prioritizes non-built-in types (classes and interfaces).
      *
-     * @param ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType The reflection type to
-     * analyze.
+     * @param ReflectionParameter $reflectionParameter The reflection parameter to analyze.
      *
      * @return array List of extracted class names, empty array if no class names found.
      *
      * @phpstan-return list<class-string>
      */
-    private function getClassName(
-        ReflectionIntersectionType|ReflectionNamedType|ReflectionType|null $reflectionType,
-    ): array {
+    private function getClassName(ReflectionParameter $reflectionParameter): array
+    {
+        $reflectionType = $reflectionParameter->getType();
+
         if ($reflectionType === null) {
             return [];
         }
@@ -323,11 +318,7 @@ class ReflectionFactory
         $classes = [];
 
         if ($reflectionType instanceof ReflectionNamedType && $reflectionType->isBuiltin() === false) {
-            $className = $reflectionType->getName();
-
-            if ($this->container->has($className)) {
-                $classes[] = $className;
-            }
+            $classes[] = $reflectionType->getName();
         }
 
         if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
@@ -380,10 +371,8 @@ class ReflectionFactory
             throw new Exception\NotInstantiable(Exception\Message::INSTANTIATION_FAILED->getMessage($class));
         }
 
-        $reflectionMethod = match ($reflection->isInternal()) {
-            true => null,
-            default => $reflection->getConstructor(),
-        };
+        $isInternal = $reflection->isInternal();
+        $reflectionMethod = $isInternal ? null : $reflection->getConstructor();
 
         if ($reflectionMethod !== null) {
             $dependencies = $this->resolveMethodParameters($reflectionMethod, $params);
@@ -587,13 +576,13 @@ class ReflectionFactory
                 return $value;
             }
 
-            if ($this->container->has($className) === false && $reflectionParameter->isDefaultValueAvailable()) {
-                return $reflectionParameter->getDefaultValue();
-            }
-
             try {
                 return $this->container->get($className);
-            } catch (Exception\NotInstantiable) {
+            } catch (Throwable) {
+                if ($reflectionParameter->isDefaultValueAvailable()) {
+                    return $reflectionParameter->getDefaultValue();
+                }
+
                 continue;
             }
         }
@@ -627,12 +616,11 @@ class ReflectionFactory
         $this->validateDependencies($params);
 
         foreach ($method->getParameters() as $key => $reflectionParameter) {
-            $type = $reflectionParameter->getType();
             $name = $reflectionParameter->getName();
 
             $key = $isAssociativeParams ? $name : $key;
 
-            $classNames = $this->getClassName($type);
+            $classNames = $this->getClassName($reflectionParameter);
 
             if ($reflectionParameter->isVariadic() === true) {
                 $resolvedParams = $this->resolveDependency($reflectionParameter, $classNames, $name, $key, $params);
