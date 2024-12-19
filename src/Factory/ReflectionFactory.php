@@ -323,7 +323,11 @@ class ReflectionFactory
         $classes = [];
 
         if ($reflectionType instanceof ReflectionNamedType && $reflectionType->isBuiltin() === false) {
-            $classes[] = $reflectionType->getName();
+            $className = $reflectionType->getName();
+
+            if ($this->container->has($className)) {
+                $classes[] = $className;
+            }
         }
 
         if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
