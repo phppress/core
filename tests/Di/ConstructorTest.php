@@ -121,8 +121,8 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
                     '__construct()' => [
                         Instance::of(Stub\ConstructorCircularA::class),
                     ],
-                ]
-            ]
+                ],
+            ],
         );
 
         $this->expectException(CircularDependency::class);

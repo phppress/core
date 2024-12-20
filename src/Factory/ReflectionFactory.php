@@ -291,11 +291,10 @@ class ReflectionFactory
      */
     private function createInstance(string $class, array $constructorParams = []): object
     {
-        if (array_find($this->dependencyStack, fn (string $value): bool => $value === $class)) {
+        if (array_find($this->dependencyStack, fn(string $value): bool => $value === $class)) {
             throw new Exception\CircularDependency(
                 Exception\Message::CIRCULAR_DEPENDENCY->getMessage(implode(' -> ', $this->dependencyStack), $class),
             );
-
         }
 
         $this->dependencyStack[] = $class;
