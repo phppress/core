@@ -295,6 +295,7 @@ class ReflectionFactory
             throw new Exception\CircularDependency(
                 Exception\Message::CIRCULAR_DEPENDENCY->getMessage(implode(' -> ', $this->dependencyStack), $class),
             );
+
         }
 
         $this->dependencyStack[] = $class;
