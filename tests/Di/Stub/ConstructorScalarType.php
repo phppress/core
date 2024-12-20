@@ -13,9 +13,9 @@ namespace PHPPress\Tests\Di\Stub;
 final readonly class ConstructorScalarType
 {
     public function __construct(
-        private bool   $bool,
-        private int    $int,
-        private float  $float,
+        private bool $bool,
+        private int $int,
+        private float $float,
         private string $string,
     ) {}
 

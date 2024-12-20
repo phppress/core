@@ -9,6 +9,8 @@ use DateTime;
 use PHPPress\Di\Container;
 use PHPPress\Di\Definition\Instance;
 use PHPPress\Exception\{InvalidArgument, InvalidDefinition};
+use PHPPress\Factory\Exception\{CircularDependency, NotInstantiable};
+use PHPPress\Tests\Support\Assert;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -99,6 +101,36 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
 
         $this->assertInstanceOf(Stub\ConstructorBuiltInPHPClassOptional::class, $instance);
         $this->assertSame(['iterator' => null], $instance->getConstructorArguments());
+    }
+
+    public function testCircularDependency(): void
+    {
+        $container = $this->createContainer(
+            [
+                Stub\ConstructorCircularA::class => [
+                    '__construct()' => [
+                        Instance::of(Stub\ConstructorCircularB::class),
+                    ],
+                ],
+                Stub\ConstructorCircularB::class => [
+                    '__construct()' => [
+                        Instance::of(Stub\ConstructorCircular::class),
+                    ],
+                ],
+                Stub\ConstructorCircular::class => [
+                    '__construct()' => [
+                        Instance::of(Stub\ConstructorCircularA::class),
+                    ],
+                ],
+            ],
+        );
+
+        $this->expectException(CircularDependency::class);
+        $this->expectExceptionMessage(
+            'Circular dependency detected: PHPPress\Tests\Di\Stub\ConstructorCircular -> PHPPress\Tests\Di\Stub\ConstructorCircularA -> PHPPress\Tests\Di\Stub\ConstructorCircularB -> PHPPress\Tests\Di\Stub\ConstructorCircular."',
+        );
+
+        $container->get(Stub\ConstructorCircular::class);
     }
 
     public function testDefinitionUsingIndexedParameters(): void
@@ -281,6 +313,29 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
             ['bool' => true, 'int' => 1, 'float' => 2.3, 'string' => 'scalar'],
             $instance->getConstructorArguments(),
         );
+    }
+
+    public function testDependencyStackCleanupOnError(): void
+    {
+        $container = $this->createContainer();
+
+        $reflectionFactory = Assert::inaccessibleProperty($container, 'reflectionFactory');
+        $dependencyStack = Assert::inaccessibleProperty($reflectionFactory, 'dependencyStack');
+
+        $this->assertEmpty($dependencyStack);
+
+        try {
+            $container->get('NonExistentClass');
+        } catch (NotInstantiable $e) {
+            $reflectionFactory = Assert::inaccessibleProperty($container, 'reflectionFactory');
+            $dependencyStack = Assert::inaccessibleProperty($reflectionFactory, 'dependencyStack');
+
+            $this->assertEmpty($dependencyStack);
+        }
+
+        $instance = $container->get(Stub\ConstructorDefaultValue::class);
+
+        $this->assertInstanceOf(Stub\ConstructorDefaultValue::class, $instance);
     }
 
     public function testFailsInvalidArguments(): void

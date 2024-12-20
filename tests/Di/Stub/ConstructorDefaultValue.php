@@ -13,7 +13,7 @@ namespace PHPPress\Tests\Di\Stub;
 final readonly class ConstructorDefaultValue
 {
     public function __construct(
-        private string               $class = 'ConstructorDefaultValue',
+        private string $class = 'ConstructorDefaultValue',
         private EngineInterface|null $engine = null,
     ) {}
 

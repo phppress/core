@@ -14,7 +14,7 @@ final readonly class EngineCar
 {
     public function __construct(
         private EngineInterface $engine,
-        private array           $moreEngines = [],
+        private array $moreEngines = [],
     ) {}
 
     public function getEngine(): EngineInterface
