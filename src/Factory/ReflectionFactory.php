@@ -19,8 +19,11 @@ use ReflectionParameter;
 use ReflectionUnionType;
 use Throwable;
 
+use function array_find;
 use function array_key_exists;
+use function array_pop;
 use function get_class;
+use function implode;
 use function in_array;
 use function is_array;
 use function is_callable;
@@ -62,6 +65,12 @@ class ReflectionFactory
      * @phpstan-var array<class-string, array>
      */
     private array $dependencies = [];
+    /**
+     * Stack to track dependency chain during resolution.
+     *
+     * @var array<string> List of class names in current dependency chain
+     */
+    private array $dependencyStack = [];
     /**
      * Cached ReflectionClass instances.
      *
@@ -282,13 +291,31 @@ class ReflectionFactory
      */
     private function createInstance(string $class, array $constructorParams = []): object
     {
-        /** @var ReflectionClass $reflection */
-        [$reflection, $dependencies] = $this->getDependencies($class, $constructorParams);
+        if (array_find($this->dependencyStack, fn (string $value): bool => $value === $class)) {
+            throw new Exception\CircularDependency(
+                Exception\Message::CIRCULAR_DEPENDENCY->getMessage(implode(' -> ', $this->dependencyStack), $class),
+            );
+        }
 
-        $mergeDependencies = $this->mergeDependencies($dependencies, $constructorParams);
-        $resolveDependencies = $this->resolveDependencies($mergeDependencies);
+        $this->dependencyStack[] = $class;
 
-        return $reflection->newInstanceArgs($resolveDependencies);
+        try {
+            /** @var ReflectionClass $reflection */
+            [$reflection, $dependencies] = $this->getDependencies($class, $constructorParams);
+
+            $mergeDependencies = $this->mergeDependencies($dependencies, $constructorParams);
+            $resolveDependencies = $this->resolveDependencies($mergeDependencies);
+
+            $instance = $reflection->newInstanceArgs($resolveDependencies);
+
+            array_pop($this->dependencyStack);
+
+            return $instance;
+        } catch (Throwable $e) {
+            array_pop($this->dependencyStack);
+
+            throw $e;
+        }
     }
 
     /**
