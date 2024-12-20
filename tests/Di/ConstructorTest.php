@@ -338,7 +338,6 @@ final class ConstructorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Stub\ConstructorDefaultValue::class, $instance);
     }
 
-
     public function testFailsInvalidArguments(): void
     {
         $container = $this->createContainer(
