@@ -30,7 +30,7 @@ final class NotInstantiableTest extends \PHPUnit\Framework\TestCase
     {
         $exception = new NotInstantiable('Test message');
 
-        $this->assertSame('Not instantiable exception: "Test message"', $exception->getMessage());
+        $this->assertSame('Not instantiable: "Test message"', $exception->getMessage());
         $this->assertSame(0, $exception->getCode());
         $this->assertNull($exception->getPrevious());
     }
@@ -40,7 +40,7 @@ final class NotInstantiableTest extends \PHPUnit\Framework\TestCase
         $previousException = new RuntimeException('Previous exception');
         $exception = new NotInstantiable('Test message', 123, $previousException);
 
-        $this->assertSame('Not instantiable exception: "Test message"', $exception->getMessage());
+        $this->assertSame('Not instantiable: "Test message"', $exception->getMessage());
         $this->assertSame(123, $exception->getCode());
         $this->assertSame($previousException, $exception->getPrevious());
     }

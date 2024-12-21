@@ -18,7 +18,7 @@ final class NotInstantiable extends Exception implements NotFoundExceptionInterf
     public function __construct(string $message = '', int $code = 0, \Throwable|null $previous = null)
     {
         if ($message !== '') {
-            $message = "Not instantiable exception: \"$message\"";
+            $message = "Not instantiable: \"$message\"";
         }
 
         parent::__construct($message, $code, $previous);

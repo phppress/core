@@ -443,7 +443,7 @@ final class InstantiationTest extends \PHPUnit\Framework\TestCase
 
         $this->expectException(NotInstantiable::class);
         $this->expectExceptionMessage(
-            'Not instantiable exception: "Failed to instantiate component or class: "NonExistentClass"."',
+            'Not instantiable: "Failed to instantiate component or class: "NonExistentClass"."',
         );
 
         $container->get(\NonExistentClass::class);
