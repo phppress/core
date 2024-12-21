@@ -30,7 +30,7 @@ final class CircularDependencyTest extends \PHPUnit\Framework\TestCase
     {
         $exception = new CircularDependency('Test message');
 
-        $this->assertSame('Circular dependency exception: "Test message"', $exception->getMessage());
+        $this->assertSame('Circular dependency: "Test message"', $exception->getMessage());
         $this->assertSame(0, $exception->getCode());
         $this->assertNull($exception->getPrevious());
     }
@@ -40,7 +40,7 @@ final class CircularDependencyTest extends \PHPUnit\Framework\TestCase
         $previousException = new RuntimeException('Previous exception');
         $exception = new CircularDependency('Test message', 123, $previousException);
 
-        $this->assertSame('Circular dependency exception: "Test message"', $exception->getMessage());
+        $this->assertSame('Circular dependency: "Test message"', $exception->getMessage());
         $this->assertSame(123, $exception->getCode());
         $this->assertSame($previousException, $exception->getPrevious());
     }

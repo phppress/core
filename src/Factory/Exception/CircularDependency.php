@@ -18,7 +18,7 @@ final class CircularDependency extends RuntimeException implements ContainerExce
     public function __construct(string $message = '', int $code = 0, \Throwable|null $previous = null)
     {
         if ($message !== '') {
-            $message = "Circular dependency exception: \"$message\"";
+            $message = "Circular dependency: \"$message\"";
         }
 
         parent::__construct($message, $code, $previous);
