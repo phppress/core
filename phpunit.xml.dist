@@ -22,4 +22,8 @@
       <directory suffix=".php">./src</directory>
     </include>
   </source>
+
+  <extensions>
+    <bootstrap class="PHPPress\Tests\Support\MockerExtension"/>
+  </extensions>
 </phpunit>

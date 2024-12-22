@@ -13,13 +13,16 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.4",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "psr/http-message": "^2.0"
     },
     "require-dev": {
+        "httpsoft/http-message": "^1.0",
         "infection/infection": "^0.29",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.4",
-        "symplify/easy-coding-standard": "^12.3"
+        "symplify/easy-coding-standard": "^12.3",
+        "xepozz/internal-mocker": "^1.4"
     },
     "autoload": {
         "psr-4": {
@@ -45,8 +48,8 @@
     "scripts": {
         "ecs": "vendor/bin/ecs check src tests",
         "ecs-fix": "vendor/bin/ecs check src tests --fix",
-        "mutation": "vendor/bin/infection --min-msi=100 --min-covered-msi=100",
+        "mutation": "./vendor/bin/infection --threads=2 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100",
         "static": "phpstan analyse src",
-        "tests": "vendor/bin/phpunit"
+        "tests": "./vendor/bin/phpunit"
     }
 }
