@@ -26,6 +26,15 @@ final class ContentRangeTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('*', $range->length);
     }
 
+    public function testFromHeaderWithEqualRange(): void
+    {
+        $range = ContentRange::fromHeader('bytes 5-5/10');
+        $this->assertNotNull($range);
+        $this->assertEquals(5, $range->first);
+        $this->assertEquals(5, $range->last);
+        $this->assertEquals(10, $range->length);
+    }
+
     public function testFromHeaderWithInvalidFormat(): void
     {
         $this->assertNull(ContentRange::fromHeader('invalid'));
