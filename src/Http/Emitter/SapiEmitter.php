@@ -26,7 +26,7 @@ use function ucwords;
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
-readonly class SapiEmitter
+readonly class SapiEmitter implements Emitter
 {
     /**
      * Initialize a new SAPI Emitter instance.
@@ -56,6 +56,12 @@ readonly class SapiEmitter
      *
      * @throws Exception\HeadersAlreadySent If headers have already been sent.
      * @throws Exception\OutputAlreadySent  If content has already been emitted.
+     *
+     * ```php
+     * $emitter = new SapiEmmiter();
+     * $response = new Response();
+     * $emitter->emit($response);
+     * ```
      */
     public function emit(ResponseInterface $response, bool $body = false): void
     {
