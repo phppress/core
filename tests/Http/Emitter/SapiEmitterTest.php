@@ -100,6 +100,9 @@ final class SapiEmitterTest extends \PHPUnit\Framework\TestCase
 
         new SapiEmitter($buffer)->emit($response);
 
+        $this->assertSame(200, Httpfunctions::http_response_code());
+        $this->assertCount(count($expectedHeaders), Httpfunctions::headers_list());
+        $this->assertSame($expectedHeaders, Httpfunctions::headers_list());
         $this->expectOutputString($outputString);
     }
 
@@ -314,6 +317,27 @@ final class SapiEmitterTest extends \PHPUnit\Framework\TestCase
         );
         $this->assertSame('HTTP/1.1 200 OK', $this->httpResponseStatusLine($response));
         $this->expectOutputString('Contents');
+    }
+
+    #[DataProviderExternal(EmitterProvider::class, 'noBodyStatusCodes')]
+    public function testNoBodyStatusCodes(int $code, string $phrase): void
+    {
+        $response = $this->createResponse(
+            $code,
+            ['Content-Type' => 'text/plain'],
+            'This content should not be emitted'
+        );
+        $response = $response->withStatus($code, $phrase);
+
+        new SapiEmitter()->emit($response);
+
+        $this->assertSame($code, HTTPFunctions::http_response_code());
+        $this->assertSame(['Content-Type: text/plain'], HTTPFunctions::headers_list());
+        $this->assertSame(
+            "HTTP/1.1 $code $phrase",
+            $this->httpResponseStatusLine($response)
+        );
+        $this->expectOutputString('');
     }
 
     public function testThrowHeadersAlreadySent(): void

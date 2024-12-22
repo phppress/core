@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PHPPress\Tests\Provider;
 
+use PHPPress\Http\Emitter\HttpNoBodyStatus;
+
 /**
  * Provider for the {@see Emitter} class.
  *
@@ -30,6 +32,25 @@ final class EmitterProvider
             ['Contents', ['nte', 'nt'], 3, 2, 6],
             ['Contents', ['ts'], 2, 6, 8],
         ];
+    }
+
+    public static function noBodyStatusCodes(): array
+    {
+        return array_map(
+            fn(HttpNoBodyStatus $status): array => [
+                'code' => $status->value,
+                'phrase' => match($status) {
+                    HttpNoBodyStatus::CONTINUE => 'Continue',
+                    HttpNoBodyStatus::SWITCHING_PROTOCOLS => 'Switching Protocols',
+                    HttpNoBodyStatus::PROCESSING => 'Processing',
+                    HttpNoBodyStatus::EARLY_HINTS => 'Early Hints',
+                    HttpNoBodyStatus::NO_CONTENT => 'No Content',
+                    HttpNoBodyStatus::RESET_CONTENT => 'Reset Content',
+                    HttpNoBodyStatus::NOT_MODIFIED => 'Not Modified',
+                }
+            ],
+            HttpNoBodyStatus::cases()
+        );
     }
 
     public static function reasonPhrase(): array

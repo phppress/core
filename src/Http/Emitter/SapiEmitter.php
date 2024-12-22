@@ -23,6 +23,14 @@ use function ucwords;
  * the emission of headers, status line, and response body while supporting features like content range and buffered
  * output.
  *
+ * According to HTTP/1.1 specifications, certain status codes MUST NOT include a message body:
+ * - `1xx` (Informational): `100` Continue, `101` Switching Protocols, `102` Processing, `103` Early Hints.
+ * - `204` No Content, `205` Reset Content.
+ * - `304` Not Modified.
+ *
+ * When these status codes are used, the emitter will not emit any body content regardless of whether one is present
+ * in the response object.
+ *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
  */
@@ -51,6 +59,10 @@ readonly class SapiEmitter implements Emitter
      * This method will emit the response headers and body to the PHP output buffer. If headers have already been sent
      * or if content has already been emitted, an exception will be raised.
      *
+     * Note: According to HTTP/1.1 specifications, responses with certain status codes
+     * (`100` - `103`, `204`, `205`, `304`) MUST NOT include a message body. For these status codes, the body will not
+     * be emitted even if present in the response object. {@see HttpNoBodyStatus} for the complete list.
+     *
      * @param ResponseInterface $response The response to emit.
      * @param bool $body Whether to emit the response body.
      *
@@ -69,7 +81,11 @@ readonly class SapiEmitter implements Emitter
         $this->emitHeaders($response);
         $this->emitStatusLine($response);
 
-        if ($body === false && $response->getBody()->isReadable() === true) {
+        if (
+            $body === false &&
+            HttpNoBodyStatus::shouldHaveNoBody($response->getStatusCode()) === false &&
+            $response->getBody()->isReadable() === true
+        ) {
             $this->emitBody($response);
         }
     }
