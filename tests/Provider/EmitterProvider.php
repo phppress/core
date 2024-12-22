@@ -37,9 +37,9 @@ final class EmitterProvider
     public static function noBodyStatusCodes(): array
     {
         return array_map(
-            fn(HttpNoBodyStatus $status): array => [
+            static fn(HttpNoBodyStatus $status): array => [
                 'code' => $status->value,
-                'phrase' => match($status) {
+                'phrase' => match ($status) {
                     HttpNoBodyStatus::CONTINUE => 'Continue',
                     HttpNoBodyStatus::SWITCHING_PROTOCOLS => 'Switching Protocols',
                     HttpNoBodyStatus::PROCESSING => 'Processing',
@@ -47,9 +47,9 @@ final class EmitterProvider
                     HttpNoBodyStatus::NO_CONTENT => 'No Content',
                     HttpNoBodyStatus::RESET_CONTENT => 'Reset Content',
                     HttpNoBodyStatus::NOT_MODIFIED => 'Not Modified',
-                }
+                },
             ],
-            HttpNoBodyStatus::cases()
+            HttpNoBodyStatus::cases(),
         );
     }
 

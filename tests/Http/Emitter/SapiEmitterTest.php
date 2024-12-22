@@ -325,7 +325,7 @@ final class SapiEmitterTest extends \PHPUnit\Framework\TestCase
         $response = $this->createResponse(
             $code,
             ['Content-Type' => 'text/plain'],
-            'This content should not be emitted'
+            'This content should not be emitted',
         );
         $response = $response->withStatus($code, $phrase);
 
@@ -335,7 +335,7 @@ final class SapiEmitterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['Content-Type: text/plain'], HTTPFunctions::headers_list());
         $this->assertSame(
             "HTTP/1.1 $code $phrase",
-            $this->httpResponseStatusLine($response)
+            $this->httpResponseStatusLine($response),
         );
         $this->expectOutputString('');
     }
