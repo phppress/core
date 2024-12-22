@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PHPPress\Tests\Provider;
 
 /**
- * Provider for the Arr class.
+ * Provider for the {@see Arr} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}

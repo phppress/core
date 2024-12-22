@@ -7,7 +7,7 @@ namespace PHPPress\Tests\Provider;
 use PHPPress\Tests\Di\Stub\{InstanceInterface, EngineInterface, EngineMarkOne, EngineStorage};
 
 /**
- * Provider for the Container class.
+ * Provider for the {@see Container} class.
  *
  * @copyright Copyright (C) 2024 PHPPress.
  * @license GNU General Public License version 3 or later {@see LICENSE}
