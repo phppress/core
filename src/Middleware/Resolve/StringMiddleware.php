@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace PHPPress\Middleware\Resolve;
 
 use InvalidArgumentException;
-use PHPPress\Middleware\Exception\Message;
-use PHPPress\Middleware\Exception\MiddlewareResolution;
+use PHPPress\Middleware\Exception\{Message, MiddlewareResolution};
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-
-use function sprintf;
 
 /**
  * Implements conversion of string class names into PSR-15 middleware.
@@ -53,12 +50,7 @@ readonly class StringMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->container->has($this->className) === false) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Middleware class "%s" not found or not registered in the container',
-                    $this->className,
-                ),
-            );
+            throw new MiddlewareResolution(Message::NOT_FOUND_IN_CONTAINER->getMessage($this->className));
         }
 
         $instance = $this->container->get($this->className);

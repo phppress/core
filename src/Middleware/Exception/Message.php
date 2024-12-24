@@ -18,6 +18,7 @@ enum Message: string
     case INVALID_RESOLVE_STRING_MIDDLEWARE = 'Middleware class "%s" must implement %s or %s.';
     case INVALID_HANDLER = 'Invalid middleware handler. Expected a string, an array, a callable, an instance of ' .
         '%s or %s, but got: %s.';
+    case NOT_FOUND_IN_CONTAINER = 'Middleware class "%s" not found or not registered in the container.';
     case NO_MIDDLEWARE_HANDLED_REQUEST = 'No middleware handled the request.';
 
     public function getMessage(string ...$argument): string
@@ -26,7 +27,8 @@ enum Message: string
             self::NO_MIDDLEWARE_HANDLED_REQUEST => $this->value,
             self::INVALID_RESOLVE_CALLABLE_MIDDLEWARE,
             self::INVALID_RESOLVE_STRING_MIDDLEWARE,
-            self::INVALID_HANDLER => sprintf($this->value, ...$argument),
+            self::INVALID_HANDLER,
+            self::NOT_FOUND_IN_CONTAINER => sprintf($this->value, ...$argument),
         };
     }
 }

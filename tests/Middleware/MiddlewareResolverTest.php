@@ -10,6 +10,7 @@ use PHPPress\Middleware\{MiddlewareDispatcher, MiddlewareResolver};
 use PHPPress\Middleware\Exception\MiddlewareResolution;
 use PHPPress\Tests\Provider\MiddlewareResolverProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
+use PHPUnit\Framework\TestSize\Unknown;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -138,12 +139,13 @@ final class MiddlewareResolverTest extends \PHPUnit\Framework\TestCase
 
         $handler = $this->createHandler();
         $request = $this->createRequest();
-        $invalidHandler = static fn(): null => null;
 
         $this->expectException(MiddlewareResolution::class);
         $this->expectExceptionMessage(
             'Middleware resolution: "Callable middleware must return an instance of Psr\Http\Message\ResponseInterface. Got: null."',
         );
+
+        $invalidHandler = static fn(): null => null;
 
         $resolver->resolve($invalidHandler)->process($request, $handler);
     }
@@ -154,12 +156,30 @@ final class MiddlewareResolverTest extends \PHPUnit\Framework\TestCase
 
         $handler = $this->createHandler();
         $request = $this->createRequest();
-        $invalidHandler = 'stdClass';
 
         $this->expectException(MiddlewareResolution::class);
         $this->expectExceptionMessage(
             'Middleware resolution: "Middleware class "stdClass" must implement Psr\Http\Server\MiddlewareInterface or Psr\Http\Server\RequestHandlerInterface."',
         );
+
+        $invalidHandler = 'stdClass';
+
+        $resolver->resolve($invalidHandler)->process($request, $handler);
+    }
+
+    public function testThorwsExceptionWithInvalidHandlerUsingStringNotFoundInContainer(): void
+    {
+        $resolver = MiddlewareResolver::create(new Container());
+
+        $handler = $this->createHandler();
+        $request = $this->createRequest();
+
+        $this->expectException(MiddlewareResolution::class);
+        $this->expectExceptionMessage(
+            'Middleware resolution: "Middleware class "Psr\Http\Server\MiddlewareInterface" not found or not registered in the container."',
+        );
+
+        $invalidHandler = MiddlewareInterface::class;
 
         $resolver->resolve($invalidHandler)->process($request, $handler);
     }
