@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PHPPress\Middleware\Handler;
 
-use PHPPress\Middleware\Collection\ImmutableStack;
+use PHPPress\Middleware\Collection\MiddlewareStack;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -31,10 +31,10 @@ readonly class Stack implements RequestHandlerInterface
     /**
      * Creates a new middleware stack handler.
      *
-     * @param ImmutableStack $stack Array of middleware to process sequentially.
+     * @param MiddlewareStack $stack Array of middleware to process sequentially.
      * @param RequestHandlerInterface $handler Fallback handler when stack is empty.
      */
-    public function __construct(private ImmutableStack $stack, private RequestHandlerInterface $handler) {}
+    public function __construct(private MiddlewareStack $stack, private RequestHandlerInterface $handler) {}
 
     /**
      * Processes the request through the middleware stack.
