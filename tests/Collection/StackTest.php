@@ -121,11 +121,28 @@ final class StackTest extends \PHPUnit\Framework\TestCase
         );
 
         $newStack = $stack->map(
-            static fn(string $item): string => $item,
+            static fn(string $item): string => strtoupper($item),
         );
 
         $this->assertInstanceOf(Stub\ImmutableStack::class, $newStack);
         $this->assertCount(3, $newStack);
+        $this->assertNotSame($stack, $newStack);
+        $this->assertSame(
+            [
+                'one',
+                'two',
+                'three',
+            ],
+            $stack->toArray(),
+        );
+        $this->assertSame(
+            [
+                'ONE',
+                'TWO',
+                'THREE',
+            ],
+            $newStack->toArray(),
+        );
     }
 
     public function testPop(): void
