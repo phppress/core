@@ -122,7 +122,7 @@ final class ImmutableStackTest extends \PHPUnit\Framework\TestCase
         $stack = ImmutableStack::create($middlewares);
 
         $newStack = $stack->map(
-            static fn (MiddlewareInterface $middleware): MiddlewareInterface => $middleware,
+            static fn(MiddlewareInterface $middleware): MiddlewareInterface => $middleware,
         );
 
         $this->assertInstanceOf(ImmutableStack::class, $newStack);
@@ -147,7 +147,7 @@ final class ImmutableStackTest extends \PHPUnit\Framework\TestCase
 
     public function testPopWithEmptyStack(): void
     {
-        $stack =ImmutableStack::create();
+        $stack = ImmutableStack::create();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Cannot pop from empty stack.');

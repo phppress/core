@@ -10,7 +10,6 @@ use PHPPress\Middleware\{MiddlewareDispatcher, MiddlewareResolver};
 use PHPPress\Middleware\Exception\MiddlewareResolution;
 use PHPPress\Tests\Provider\MiddlewareResolverProvider;
 use PHPUnit\Framework\Attributes\{DataProviderExternal, Group};
-use PHPUnit\Framework\TestSize\Unknown;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -30,7 +29,7 @@ final class MiddlewareResolverTest extends \PHPUnit\Framework\TestCase
         $originalMiddleware = new class implements MiddlewareInterface {
             public function process(
                 ServerRequestInterface $request,
-                RequestHandlerInterface $handler
+                RequestHandlerInterface $handler,
             ): ResponseInterface {
                 return $handler->handle($request);
             }

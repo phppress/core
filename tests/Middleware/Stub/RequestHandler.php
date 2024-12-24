@@ -16,9 +16,6 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 final class RequestHandler implements RequestHandlerInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $response = new Response(200, ['X-Request-Handler' => 'true']);

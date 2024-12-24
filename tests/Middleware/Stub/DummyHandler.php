@@ -17,9 +17,6 @@ use stdClass;
  */
 final class DummyHandler
 {
-    /**
-     * @return Response
-     */
     public static function staticHandler(): response
     {
         return new Response();

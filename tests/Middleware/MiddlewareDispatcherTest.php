@@ -54,7 +54,7 @@ final class MiddlewareDispatcherTest extends \PHPUnit\Framework\TestCase
                 {
                     return (new Stub\RequestHandler())->handle($request);
                 }
-            }
+            },
         );
 
         $response = $middlewareDispatcher->handle($request);

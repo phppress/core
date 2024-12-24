@@ -93,7 +93,8 @@ final class MiddlewareResolverProvider
                     FirstMiddleware::class,
                     [new SecondMiddleware(), 'process'],
                     static function (
-                        ServerRequestInterface $request, RequestHandlerInterface $handler,
+                        ServerRequestInterface $request,
+                        RequestHandlerInterface $handler,
                     ): ResponseInterface {
                         return (new ThirdMiddleware())->process($request, $handler);
                     },

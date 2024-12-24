@@ -15,9 +15,6 @@ use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
  */
 final class PathMiddleware implements MiddlewareInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);

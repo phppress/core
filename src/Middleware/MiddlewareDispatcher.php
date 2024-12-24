@@ -40,7 +40,7 @@ class MiddlewareDispatcher implements Middleware
 {
     private Collection\ImmutableStack $stack {
         get => $this->stack ?? Collection\ImmutableStack::create();
-        set => $this->stack = $value;
+    set => $this->stack = $value;
     }
 
     /**

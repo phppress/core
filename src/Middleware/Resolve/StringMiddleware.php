@@ -68,7 +68,6 @@ readonly class StringMiddleware implements MiddlewareInterface
                 $this->className,
                 MiddlewareInterface::class,
                 RequestHandlerInterface::class,
-
             ),
         );
     }
