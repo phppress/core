@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PHPPress\Middleware;
 
-use PHPPress\Middleware\Collection\ImmutableStack;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 
@@ -109,7 +108,7 @@ readonly class MiddlewareResolver implements Resolver
      */
     private function resolveArray(array $handlers): MiddlewareInterface
     {
-        $stack = ImmutableStack::create($handlers)->map(
+        $stack = Collection\MiddlewareStack::create($handlers)->map(
             fn(mixed $handler): MiddlewareInterface => $this->resolve($handler),
         );
 

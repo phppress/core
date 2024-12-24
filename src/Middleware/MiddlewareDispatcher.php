@@ -38,9 +38,9 @@ use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
  */
 class MiddlewareDispatcher implements Middleware
 {
-    private Collection\ImmutableStack $stack {
-        get => $this->stack ?? Collection\ImmutableStack::create();
-    set => $this->stack = $value;
+    private Collection\MiddlewareStack $stack {
+        get => $this->stack ?? Collection\MiddlewareStack::create();
+        set => $this->stack = $value;
     }
 
     /**
