@@ -7,9 +7,17 @@ use PhpCsFixer\Fixer\ClassNotation\OrderedClassElementsFixer;
 use PhpCsFixer\Fixer\ClassNotation\OrderedTraitsFixer;
 use PhpCsFixer\Fixer\ClassNotation\VisibilityRequiredFixer;
 use PhpCsFixer\Fixer\Import\NoUnusedImportsFixer;
+use PhpCsFixer\Fixer\Whitespace\StatementIndentationFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 return ECSConfig::configure()
+    ->withSkip(
+        [
+            StatementIndentationFixer::class => [
+                __DIR__ . '/src/Middleware/MiddlewareDispatcher.php'
+            ],
+        ]
+    )
     ->withConfiguredRule(
         ClassDefinitionFixer::class,
         [
